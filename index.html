@@ -444,6 +444,16 @@
     let selectedPayType = '';
     let existedCarNames = []; // 已提交的班次名称
 
+    // 固定班次排序（核心：按这个顺序展示）
+    const FIXED_CAR_ORDER = [
+        '4月11日早送',
+        '4月11日晚接',
+        '4月12日早送',
+        '4月12日晚接',
+        '4月11日中午考点更换',
+        '4月12日中午考点更换'
+    ];
+
     // 自动加载用户历史班次
     async function loadUserHistory() {
         const name = document.getElementById('userName').value.trim();
@@ -637,10 +647,14 @@
                     <strong>提交时间：</strong>${createTime}<br>
                     <strong>已选班次：</strong><br>
                 `;
-                userCarList.forEach(item => {
-                    info += `- ${item.name}<br>`;
-                    if(item.school) info += `　学校：${item.school}<br>`;
-                    if(item.from && item.to) info += `　${item.from}→${item.to}<br>`;
+                // 核心修改：按固定顺序展示班次
+                FIXED_CAR_ORDER.forEach(carName => {
+                    const carItem = userCarList.find(item => item.name === carName);
+                    if(carItem) {
+                        info += `- ${carItem.name}<br>`;
+                        if(carItem.school) info += `　学校：${carItem.school}<br>`;
+                        if(carItem.from && carItem.to) info += `　${carItem.from}→${carItem.to}<br>`;
+                    }
                 });
                 document.getElementById('successInfo').innerHTML = info;
                 document.getElementById('successModal').style.display = 'flex';
@@ -688,10 +702,14 @@
                     html += `<strong>订单 ${idx+1}</strong><br>`;
                     html += `姓名：${item.userName}<br>电话：${item.userPhone}<br>`;
                     html += `金额：${item.total} 元<br>班次：<br>`;
-                    item.carList.forEach(c=>{
-                        html += `- ${c.name}<br>`;
-                        if(c.school) html += `　学校：${c.school}<br>`;
-                        if(c.from&&c.to) html += `　${c.from}→${c.to}<br>`;
+                    // 核心修改：查询结果按固定顺序展示班次
+                    FIXED_CAR_ORDER.forEach(carName => {
+                        const carItem = item.carList.find(i => i.name === carName);
+                        if(carItem) {
+                            html += `- ${carItem.name}<br>`;
+                            if(carItem.school) html += `　学校：${carItem.school}<br>`;
+                            if(carItem.from&&carItem.to) html += `　${carItem.from}→${carItem.to}<br>`;
+                        }
                     });
                     html += `</div>`;
                 });
