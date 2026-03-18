@@ -1,353 +1,202 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>订单管理后台</title>
-<style>
-  *{margin:0;padding:0;box-sizing:border-box}
-  body{
-    padding: 20px 10px;
-    background:#f5f7fa;
-    font-family:Arial;
-    max-width: 100vw;
-    overflow-x: hidden;
-  }
-  .login{
-    max-width:400px;
-    margin:50px auto;
-    background:white;
-    padding:30px;
-    border-radius:10px;
-    box-shadow:0 2px 10px #00000010;
-    width: 90%;
-  }
-  .login input{
-    width:100%;
-    padding:12px;
-    margin:10px 0;
-    border:1px solid #ddd;
-    border-radius:5px;
-  }
-  .login button{
-    width:100%;
-    padding:12px;
-    background:#007bff;
-    color:white;
-    border:none;
-    border-radius:5px;
-  }
-  .container{
-    display:none;
-    max-width: none;
-    width: 98%;
-    margin: 0 auto;
-    background:white;
-    padding:20px 15px;
-    border-radius:10px;
-    box-shadow:0 2px 10px #00000010;
-  }
-  h1{
-    margin-bottom:10px;
-    text-align:center;
-    font-size: 20px;
-  }
-  .search-tools{
-    display:flex;
-    gap:10px;
-    margin-bottom:15px;
-    flex-wrap:wrap;
-    align-items:center;
-  }
-  .search-tools input{
-    padding:8px 10px;
-    border:1px solid #ddd;
-    border-radius:5px;
-    width:200px;
-  }
-  .search-tools button{
-    padding:8px 16px;
-    background:#007bff;
-    color:white;
-    border:none;
-    border-radius:5px;
-    cursor:pointer;
-  }
-  .tools{
-    display:flex;
-    gap:10px;
-    margin-bottom:15px;
-    align-items:center;
-    justify-content:space-between;
-    flex-wrap: wrap;
-  }
-  button{
-    padding:8px 16px;
-    background:#007bff;
-    color:white;
-    border:none;
-    border-radius:5px;
-    cursor:pointer;
-  }
-  button.del-btn{background:#dc3545}
-  button.exit-btn{background:#6c757d}
-  .table-container{
-    overflow-x: auto;
-    margin:10px 0;
-  }
-  table{
-    width:100%;
-    min-width: 1400px;
-    border-collapse:collapse;
-  }
-  th,td{
-    border:1px solid #ddd;
-    padding:8px 6px;
-    text-align:center;
-    white-space:nowrap;
-    font-size:13px;
-  }
-  th{background:#f8f9fa}
-  .id-col{width:80px}
-  .time-col{width:150px}
-  .name-col{width:80px}
-  .phone-col{width:110px}
-  .paytype-col{width:100px}
-  .pay-record-col{width: 250px;} /* 新增支付记录列宽度 */
-  .money-col{width:80px}
-  .oper-col{width:80px}
-  .class-col{width:120px}
-  .remark-col{width:150px}
-  /* 支付记录换行显示 */
-  .pay-record {
-    white-space: pre-line;
-    text-align: left;
-    padding: 5px;
-    line-height: 1.4;
-  }
-</style>
-</head>
+const express = require('express');
+const cors = require('cors');
+const mongoose = require('mongoose');
+const app = express();
 
-<body>
-<div class="login" id="loginBox">
-  <h2>后台登录</h2>
-  <input type="password" id="pwd" placeholder="请输入管理密码">
-  <button onclick="login()">登录</button>
-</div>
+// ====================== 核心配置 ======================
+const MONGODB_URI = "mongodb+srv://396007177_db_user:sutong5560@cluster0.s9vvavd.mongodb.net/zikaocar?retryWrites=true&w=majority&appName=Cluster0&connectTimeoutMS=15000&socketTimeoutMS=15000&serverSelectionTimeoutMS=15000";
+const ADMIN_PWD = 'sutong5560';
+// 固定班次排序
+const FIXED_CAR_ORDER = [
+    '4月11日早送',
+    '4月11日晚接',
+    '4月12日早送',
+    '4月12日晚接',
+    '4月11日中午考点更换',
+    '4月12日中午考点更换'
+];
+// ======================================================
 
-<div class="container" id="adminBox">
-  <h1>订单管理</h1>
-  <div class="search-tools">
-    <input type="text" id="searchName" placeholder="姓名查询">
-    <input type="text" id="searchPhone" placeholder="电话查询">
-    <button onclick="searchOrders()">查询</button>
-    <button onclick="resetSearch()">重置</button>
-  </div>
-  <div class="tools">
-    <button onclick="load()">刷新</button>
-    <button onclick="exportExcel()">导出Excel</button>
-    <button class="exit-btn" onclick="logout()">退出</button>
-  </div>
-  <div class="table-container">
-    <table>
-      <thead>
-        <tr>
-          <th class="id-col">订单ID</th>
-          <th class="name-col">姓名</th>
-          <th class="phone-col">电话</th>
-          <th class="paytype-col">最后支付方式</th>
-          <th class="pay-record-col">支付记录（每一笔）</th> <!-- 新增列 -->
-          <th class="money-col">总金额</th>
-          <th class="time-col">最后提交时间</th>
-          <th class="class-col">4月11日早送</th>
-          <th class="class-col">4月11日晚接</th>
-          <th class="class-col">4月12日早送</th>
-          <th class="class-col">4月12日晚接</th>
-          <th class="class-col">4月11日中午更换</th>
-          <th class="class-col">4月12日中午更换</th>
-          <th class="oper-col">操作</th>
-        </tr>
-      </thead>
-      <tbody id="list"></tbody>
-    </table>
-  </div>
-</div>
+// 跨域配置
+app.use(cors({
+  origin: 'https://st396007077.github.io',
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type']
+}));
 
-<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-<script>
-// 核心配置
-const SERVER_URL = "https://zikaocar-server.onrender.com";
-const PWD = "sutong5560";
-let orderData = [];
-let filteredOrderData = [];
+app.use(express.json());
 
-// 登录函数
-function login(){
-  const val = document.getElementById('pwd').value;
-  if(val !== PWD){
-    alert('密码错误');
-    return;
-  }
-  document.getElementById('loginBox').style.display = 'none';
-  document.getElementById('adminBox').style.display = 'block';
-  load();
+// 连接MongoDB
+mongoose.connect(MONGODB_URI)
+  .then(() => console.log('✅ MongoDB连接成功！'))
+  .catch(err => console.error('❌ MongoDB连接失败：', err));
+
+// 订单Schema - 新增 isModified 标记手动修改
+const OrderSchema = new mongoose.Schema({
+  userName: { type: String, required: true },
+  userPhone: { type: String, required: false, default: '-' },
+  total: { type: Number, required: true },
+  carList: { type: Array, required: true },
+  orderId: { type: String, unique: true },
+  payType: { type: String, required: false, default: '-' }, // 最后一次支付方式
+  createTime: { type: String, required: false, default: '' },
+  paymentRecords: { type: Array, required: true, default: [] }, // 每笔支付记录：[{payType, amount, time}, ...]
+  isModified: { type: Boolean, default: false } // 标记是否手动修改过班次
+});
+const Order = mongoose.model('Order', OrderSchema);
+
+// 24小时制时间
+function get24HourTime() {
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hour = String(date.getHours()).padStart(2, '0');
+  const minute = String(date.getMinutes()).padStart(2, '0');
+  const second = String(date.getSeconds()).padStart(2, '0');
+  return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
 }
 
-// 退出登录
-function logout(){
-  if(confirm('确定退出？')){
-    document.getElementById('loginBox').style.display = 'block';
-    document.getElementById('adminBox').style.display = 'none';
-  }
+// 按固定顺序排序班次
+function sortCarList(carList) {
+  return FIXED_CAR_ORDER.map(name => {
+    return carList.find(item => item.name === name);
+  }).filter(Boolean); // 过滤掉undefined
 }
 
-// 加载所有订单
-async function load() {
+// ==============================================
+// 【核心优化】提交订单：追加班次 + 追加支付记录
+// ==============================================
+app.post('/api/submitOrder', async (req, res) => {
   try {
-    const res = await fetch(`${SERVER_URL}/api/getAllOrders?pwd=${PWD}`);
-    const data = await res.json();
-    if(data.code !== 0) { 
-      alert(data.msg); 
-      return; 
-    }
-    orderData = data.data;
-    filteredOrderData = [...orderData];
-    renderTable();
-  } catch (err) {
-    alert('加载失败：' + err.message);
-  }
-}
+    const { userName, userPhone, payType, total, carList, createTime } = req.body;
+    const submitTime = createTime || get24HourTime();
 
-// 渲染订单表格（新增支付记录展示）
-function renderTable() {
-  const list = document.getElementById('list');
-  list.innerHTML = '';
-  
-  if(filteredOrderData.length === 0) {
-    list.innerHTML = '<tr><td colspan="14">暂无数据</td></tr>';
-    return;
-  }
-  
-  filteredOrderData.forEach(order => {
-    const tr = document.createElement('tr');
-    // 封装获取班次信息的函数
-    const getClassInfo = (name) => {
-      const item = order.carList.find(i => i.name === name);
-      if(!item) return '-';
-      if(item.school) return item.school;
-      if(item.from && item.to) return `${item.from}→${item.to}`;
-      return '-';
-    };
-
-    // 格式化支付记录（每一笔分行显示）
-    const formatPaymentRecords = () => {
-      if(!order.paymentRecords || order.paymentRecords.length === 0) return '-';
-      return order.paymentRecords.map((record, index) => {
-        return `第${index+1}笔：${record.payType} ${record.amount}元 ${record.time}`;
-      }).join('\n'); // 用换行符分隔，配合CSS的pre-line显示
-    };
-    
-    tr.innerHTML = `
-      <td>${order.orderId || '-'}</td>
-      <td>${order.userName || '-'}</td>
-      <td>${order.userPhone || '-'}</td>
-      <td>${order.payType || '-'}</td>
-      <td class="pay-record">${formatPaymentRecords()}</td> <!-- 新增支付记录列 -->
-      <td>${order.total || 0}</td>
-      <td>${order.createTime || '-'}</td>
-      <td>${getClassInfo('4月11日早送')}</td>
-      <td>${getClassInfo('4月11日晚接')}</td>
-      <td>${getClassInfo('4月12日早送')}</td>
-      <td>${getClassInfo('4月12日晚接')}</td>
-      <td>${getClassInfo('4月11日中午考点更换')}</td>
-      <td>${getClassInfo('4月12日中午考点更换')}</td>
-      <td><button class="del-btn" onclick="deleteOrder('${order._id}')">删除</button></td>
-    `;
-    list.appendChild(tr);
-  });
-}
-
-// 删除订单
-async function deleteOrder(id) {
-  if(!confirm('确定删除该订单？')) return;
-  try {
-    const res = await fetch(`${SERVER_URL}/api/deleteOrder`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pwd: PWD, id })
+    // 查找是否已有该用户
+    const existOrder = await Order.findOne({
+      userName: userName.trim(),
+      userPhone: userPhone.trim()
     });
-    const data = await res.json();
-    alert(data.msg);
-    load(); // 删除后刷新列表
+
+    if (existOrder) {
+      // ==========================================
+      // 已有数据 → 合并班次 + 累加金额 + 追加支付记录
+      // ==========================================
+      const oldCarList = existOrder.carList || [];
+      const oldCarNames = oldCarList.map(item => item.name);
+
+      // 新提交的班次（过滤掉已存在的）
+      const newCarList = carList.filter(item => !oldCarNames.includes(item.name));
+      // 最终班次 = 旧班次 + 新班次 → 按固定顺序排序
+      const mergedCarList = sortCarList([...oldCarList, ...newCarList]);
+      // 最终金额 = 旧金额 + 新提交金额
+      const mergedTotal = existOrder.total + total;
+
+      // 新增：追加支付记录（每一笔都存）
+      const newPaymentRecord = {
+        payType: payType || '-',
+        amount: total, // 本次支付金额
+        time: submitTime // 本次提交时间
+      };
+      const mergedPaymentRecords = [...existOrder.paymentRecords, newPaymentRecord];
+
+      // 更新数据库
+      await Order.findByIdAndUpdate(existOrder._id, {
+        total: mergedTotal,
+        carList: mergedCarList,
+        payType: payType || existOrder.payType, // 保留最后一次支付方式
+        createTime: submitTime,
+        paymentRecords: mergedPaymentRecords // 存储所有支付记录
+        // isModified 保持原有值（手动修改才会改）
+      });
+
+      return res.json({
+        code: 0,
+        msg: '✅ 追加班次成功',
+        orderId: existOrder.orderId
+      });
+    }
+
+    // 无数据 → 新建（初始化支付记录 + 按固定顺序排序）
+    const sortedCarList = sortCarList(carList || []);
+    const orderData = {
+      userName: userName || '未知用户',
+      userPhone: userPhone || '-',
+      payType: payType || '-',
+      total: total || 0,
+      carList: sortedCarList,
+      orderId: 'ORD' + Date.now(),
+      createTime: submitTime,
+      paymentRecords: [{ // 初始化第一笔支付记录
+        payType: payType || '-',
+        amount: total,
+        time: submitTime
+      }],
+      isModified: false
+    };
+
+    const newOrder = new Order(orderData);
+    await newOrder.save();
+
+    res.json({ code: 0, msg: '✅ 提交成功', orderId: orderData.orderId });
+
   } catch (err) {
-    alert('删除失败：' + err.message);
+    console.error('提交失败：', err);
+    res.json({ code: -1, msg: '提交失败' });
   }
-}
+});
 
-// 搜索订单
-function searchOrders() {
-  const name = document.getElementById('searchName').value.trim();
-  const phone = document.getElementById('searchPhone').value.trim();
-  
-  filteredOrderData = orderData.filter(o => 
-    (o.userName || '').includes(name) && 
-    (o.userPhone || '').includes(phone)
-  );
-  renderTable();
-}
-
-// 重置搜索
-function resetSearch() {
-  document.getElementById('searchName').value = '';
-  document.getElementById('searchPhone').value = '';
-  filteredOrderData = [...orderData];
-  renderTable();
-}
-
-// 导出Excel（包含支付记录）
-function exportExcel() {
-  if(filteredOrderData.length === 0) { 
-    alert('暂无数据可导出'); 
-    return; 
+// ====================== 查询订单 ======================
+app.get('/api/queryOrder', async (req, res) => {
+  try {
+    const { userName } = req.query;
+    const orders = await Order.find({ userName });
+    // 返回时按固定顺序排序班次
+    const sortedOrders = orders.map(order => ({
+      ...order.toObject(),
+      carList: sortCarList(order.carList || [])
+    }));
+    res.json({ code: 0, data: sortedOrders });
+  } catch (err) {
+    res.json({ code: -1, msg: '查询失败' });
   }
-  
-  const excelData = filteredOrderData.map(o => {
-    const getInfo = (n) => {
-      const i = o.carList.find(x=>x.name===n);
-      if(!i) return '-';
-      if(i.school) return i.school;
-      if(i.from&&i.to) return i.from+'→'+i.to;
-      return '-';
-    };
+});
 
-    // 格式化支付记录为Excel可显示的文本
-    const getPaymentRecords = () => {
-      if(!o.paymentRecords || o.paymentRecords.length === 0) return '-';
-      return o.paymentRecords.map((r, i) => `第${i+1}笔：${r.payType} ${r.amount}元 ${r.time}`).join('；');
-    };
+// ====================== 获取所有订单 ======================
+app.get('/api/getAllOrders', async (req, res) => {
+  try {
+    const { pwd } = req.query;
+    if (pwd !== ADMIN_PWD) return res.json({ code: -2, msg: '密码错误' });
+    
+    const orders = await Order.find().sort({ _id: -1 });
+    const ordersWithId = orders.map(item => ({
+      ...item.toObject(),
+      id: item._id.toString(),
+      carList: sortCarList(item.carList || []), // 按固定顺序排序
+      submitCount: item.paymentRecords.length // 提交次数
+    }));
+    
+    res.json({ code: 0, data: ordersWithId });
+  } catch (err) {
+    res.json({ code: -1, msg: '加载失败' });
+  }
+});
 
-    return {
-      订单ID: o.orderId || '-',
-      姓名: o.userName || '-',
-      电话: o.userPhone || '-',
-      最后支付方式: o.payType || '-',
-      支付记录: getPaymentRecords(), // 新增支付记录字段
-      总金额: o.total || 0,
-      最后提交时间: o.createTime || '-',
-      '4月11日早送': getInfo('4月11日早送'),
-      '4月11日晚接': getInfo('4月11日晚接'),
-      '4月12日早送': getInfo('4月12日早送'),
-      '4月12日晚接': getInfo('4月12日晚接'),
-      '4月11日中午更换': getInfo('4月11日中午考点更换'),
-      '4月12日中午更换': getInfo('4月12日中午考点更换')
-    };
-  });
-  
-  const ws = XLSX.utils.json_to_sheet(excelData);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, '订单列表');
-  XLSX.writeFile(wb, `订单列表_${new Date().toLocaleDateString()}.xlsx`);
-}
-</script>
-</body>
-</html>
+// ====================== 删除订单 ======================
+app.post('/api/deleteOrder', async (req, res) => {
+  try {
+    const { pwd, id } = req.body;
+    if (pwd !== ADMIN_PWD) return res.json({ code: -2, msg: '密码错误' });
+    
+    await Order.findByIdAndDelete(id);
+    res.json({ code: 0, msg: '删除成功' });
+  } catch (err) {
+    res.json({ code: -1, msg: '删除失败' });
+  }
+});
+
+// ====================== 启动服务 ======================
+const port = process.env.PORT || 10000;
+app.listen(port, () => {
+  console.log(`服务启动成功，端口：${port}`);
+});
