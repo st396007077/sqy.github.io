@@ -60,6 +60,7 @@
     border-radius:5px;
     font-size:13px;
     color:#666;
+    text-align: left; /* 左对齐 */
   }
   .color-desc span{
     display:inline-block;
@@ -226,6 +227,20 @@
     background:#f8f9fa;
     border-radius:4px;
   }
+  /* 考点更换特殊处理：双下拉框 */
+  .class-item.double-select {
+    flex-wrap: wrap;
+  }
+  .class-item.double-select .select-group {
+    flex: 1;
+    min-width: 150px;
+    margin-bottom: 5px;
+  }
+  .class-item.double-select .select-group label {
+    font-size: 12px;
+    margin-bottom: 3px;
+    color: #666;
+  }
   .class-item select{
     flex:1;
     padding:6px;
@@ -234,6 +249,7 @@
     padding:6px 10px;
     background:#dc3545;
     font-size:12px;
+    white-space: nowrap;
   }
   .add-class-btn{
     padding:6px 10px;
@@ -271,6 +287,16 @@
     .search-tools input{
       width: 100%;
     }
+    .class-item {
+      flex-wrap: wrap;
+    }
+    .class-item select {
+      width: 100%;
+      margin-bottom: 5px;
+    }
+    .class-item button {
+      width: 100%;
+    }
   }
 </style>
 </head>
@@ -286,7 +312,7 @@
 <!-- 管理界面 -->
 <div class="container" id="adminBox">
   <h1>订单管理</h1>
-  <!-- 颜色说明 -->
+  <!-- 颜色说明（左对齐） -->
   <div class="color-desc">
     <span class="color-normal"><i></i>白色：正常</span>
     <span class="color-modified"><i></i>蓝色：修改过</span>
@@ -294,10 +320,10 @@
     <span class="color-repeat"><i></i>红色：重复提交同一班次</span>
   </div>
   
-  <!-- 查询工具 -->
+  <!-- 查询工具：姓名/电话模糊查询 -->
   <div class="search-tools">
-    <input type="text" id="searchName" placeholder="请输入姓名查询">
-    <input type="text" id="searchPhone" placeholder="请输入联系电话查询">
+    <input type="text" id="searchName" placeholder="请输入姓名查询（模糊匹配）">
+    <input type="text" id="searchPhone" placeholder="请输入联系电话查询（模糊匹配）">
     <button onclick="searchOrders()">查询</button>
     <button onclick="resetSearch()">重置</button>
   </div>
@@ -344,12 +370,12 @@
     <div class="modal-title">修改订单信息</div>
     <input type="hidden" id="editOrderId">
     <div class="form-group">
-      <label>姓名</label>
-      <input type="text" id="editName" placeholder="请输入姓名">
+      <label>姓名 <span style="color:red">*</span></label>
+      <input type="text" id="editName" placeholder="请输入2-5个汉字的真实姓名">
     </div>
     <div class="form-group">
-      <label>联系电话</label>
-      <input type="text" id="editPhone" placeholder="请输入联系电话">
+      <label>联系电话 <span style="color:red">*</span></label>
+      <input type="tel" id="editPhone" placeholder="请输入11位手机号码" maxlength="11">
     </div>
     <div class="form-group">
       <label>乘坐班次</label>
@@ -373,7 +399,8 @@ const PWD = "sutong5560";
 
 let orderData = []; // 原始订单数据
 let filteredOrderData = []; // 筛选后的订单数据
-// 班次列表
+
+// 班次列表（与前端保持一致）
 const classTypes = [
   "4月11日早送",
   "4月11日晚接",
@@ -382,10 +409,26 @@ const classTypes = [
   "4月11日中午考点更换",
   "4月12日中午考点更换"
 ];
-// 示例学校列表（可根据实际需求修改）
+
+// 学校列表（与前端保持一致）
 const schoolList = [
-  "学校A", "学校B", "学校C", "学校D", "学校E"
+  "XX职业技术学院", 
+  "XX师范大学", 
+  "XX理工学院", 
+  "XX财经大学"
 ];
+
+// 验证姓名（2-5个汉字）
+function validateName(name) {
+  const reg = /^[\u4e00-\u9fa5]{2,5}$/;
+  return reg.test(name);
+}
+
+// 验证手机号码
+function validatePhone(phone) {
+  const reg = /^1[3-9]\d{9}$/;
+  return reg.test(phone);
+}
 
 // 登录
 function login(){
@@ -407,7 +450,7 @@ function logout(){
   }
 }
 
-// 解析班次数据
+// 解析班次数据（适配考点更换的双学校格式）
 function parseClassData(carList) {
   const classMap = {
     "4月11日早送": "-",
@@ -426,7 +469,8 @@ function parseClassData(carList) {
     } else if(item.from && item.to) {
       content = `${item.from}→${item.to}`;
     }
-    if(classMap.hasOwnProperty(className)) {
+    // 重复班次只保留第一个（避免表格单元格重复显示）
+    if(classMap[className] === "-") {
       classMap[className] = content;
     }
   });
@@ -434,12 +478,20 @@ function parseClassData(carList) {
   return classMap;
 }
 
-// 检测重复数据和重复班次
+// 检测重复数据和重复班次（核心逻辑）
 function processOrderData(orders) {
-  // 1. 按姓名+电话分组
+  // 1. 按姓名+电话分组（空值不参与分组）
   const groupMap = {};
   orders.forEach(order => {
-    const key = `${order.userName || ''}_${order.userPhone || ''}`;
+    const name = (order.userName || '').trim();
+    const phone = (order.userPhone || '').trim();
+    if(!name || !phone) {
+      // 姓名/电话为空的订单不合并，单独处理
+      const key = `empty_${order.id}`;
+      groupMap[key] = [order];
+      return;
+    }
+    const key = `${name}_${phone}`;
     if(!groupMap[key]) {
       groupMap[key] = [];
     }
@@ -447,19 +499,28 @@ function processOrderData(orders) {
   });
 
   const processedOrders = [];
+  
   // 2. 处理每组数据
   Object.values(groupMap).forEach(group => {
     if(group.length === 1) {
       // 单条数据：检测是否有重复班次
-      const order = group[0];
+      const order = { ...group[0] };
       const classNames = order.carList.map(item => item.name);
+      // 检测是否有重复班次（同一班次出现多次）
       const hasRepeatClass = classNames.some((name, index) => classNames.indexOf(name) !== index);
-      order.remark = hasRepeatClass ? "重复提交同一班次" : "";
-      order.rowClass = hasRepeatClass ? "row-repeat" : "";
+      
+      // 设置备注和行样式
+      if(hasRepeatClass) {
+        order.remark = "重复提交同一班次";
+        order.rowClass = "row-repeat"; // 红色
+      } else {
+        order.remark = order.remark || ""; // 保留原有备注（如修改后的备注）
+        order.rowClass = order.rowClass || ""; // 保留原有样式（如修改后的蓝色）
+      }
       processedOrders.push(order);
     } else {
-      // 多条数据：合并
-      const firstOrder = group[0];
+      // 多条数据：合并为一行
+      const firstOrder = { ...group[0] };
       // 合并所有班次
       const allCarList = [];
       const classNames = [];
@@ -468,6 +529,7 @@ function processOrderData(orders) {
       group.forEach(order => {
         order.carList.forEach(item => {
           allCarList.push(item);
+          // 检测是否有重复班次
           if(classNames.includes(item.name)) {
             hasRepeatClass = true;
           }
@@ -479,10 +541,10 @@ function processOrderData(orders) {
       const mergedOrder = {
         ...firstOrder,
         carList: allCarList,
+        mergedOrders: group, // 保存合并的原始订单ID
+        // 备注和样式
         remark: hasRepeatClass ? "重复提交同一班次" : "第二次及之后的提交内容",
-        rowClass: hasRepeatClass ? "row-repeat" : "row-multi",
-        isMerged: true,
-        mergedOrders: group // 保存合并的原始订单
+        rowClass: hasRepeatClass ? "row-repeat" : "row-multi" // 红色/绿色
       };
       processedOrders.push(mergedOrder);
     }
@@ -503,7 +565,7 @@ function load(){
   .then(res=>{
     if(res.code===0){
       orderData = res.data;
-      // 处理数据（合并、检测重复）
+      // 处理数据（合并、检测重复、设置样式）
       const processedData = processOrderData(orderData);
       filteredOrderData = processedData;
       renderOrderList(filteredOrderData);
@@ -527,6 +589,7 @@ function renderOrderList(orders) {
   } else {
     orders.forEach(item=>{
       const classData = parseClassData(item.carList || []);
+      // 渲染行（带样式和备注）
       html += `
         <tr data-order-id="${item.id}" class="${item.rowClass || ''}">
           <td class="id-col">${item.orderId || item.id || '-'}</td>
@@ -553,22 +616,22 @@ function renderOrderList(orders) {
   document.getElementById('list').innerHTML = html;
 }
 
-// 查询订单
+// 查询订单（姓名/电话模糊匹配）
 function searchOrders() {
   const name = document.getElementById('searchName').value.trim().toLowerCase();
   const phone = document.getElementById('searchPhone').value.trim();
   
   if(!name && !phone) {
+    // 无查询条件：显示全部
     filteredOrderData = processOrderData(orderData);
     renderOrderList(filteredOrderData);
     return;
   }
 
-  // 筛选逻辑
+  // 筛选逻辑：姓名包含 或 电话包含（模糊匹配）
   const filtered = filteredOrderData.filter(order => {
     const orderName = (order.userName || '').toLowerCase();
     const orderPhone = order.userPhone || '';
-    // 姓名匹配 或 电话匹配
     return (name ? orderName.includes(name) : true) && (phone ? orderPhone.includes(phone) : true);
   });
 
@@ -585,8 +648,14 @@ function resetSearch() {
 
 // 打开修改弹窗
 function openEditModal(orderId) {
-  // 查找订单
-  const order = orderData.find(item => item.id === orderId);
+  // 查找订单（兼容合并订单）
+  let order = orderData.find(item => item.id === orderId);
+  // 如果是合并订单，取第一个原始订单
+  if(!order && filteredOrderData.some(item => item.mergedOrders)) {
+    const mergedOrder = filteredOrderData.find(item => item.mergedOrders && item.mergedOrders.some(o => o.id === orderId));
+    if(mergedOrder) order = mergedOrder.mergedOrders[0];
+  }
+  
   if(!order) {
     alert('订单不存在');
     return;
@@ -600,52 +669,104 @@ function openEditModal(orderId) {
   // 渲染班次编辑项
   const container = document.getElementById('classItemsContainer');
   container.innerHTML = '';
+  
   // 现有班次
   (order.carList || []).forEach((item, index) => {
-    addClassItemToContainer(item.name, item.school || (item.from && item.to ? `${item.from}→${item.to}` : ''), index);
+    const isDoubleSelect = item.name.includes('考点更换'); // 考点更换显示双下拉
+    let schoolValue = item.school || '';
+    let fromSchool = '';
+    let toSchool = '';
+    if(item.from && item.to) {
+      fromSchool = item.from;
+      toSchool = item.to;
+    }
+    addClassItemToContainer(item.name, schoolValue, fromSchool, toSchool, index, isDoubleSelect);
   });
+  
   // 如果没有班次，添加一个默认的
   if((order.carList || []).length === 0) {
-    addClassItemToContainer(classTypes[0], '', 0);
+    addClassItemToContainer(classTypes[0], schoolList[0], '', '', 0, false);
   }
 
   // 显示弹窗
   document.getElementById('editModal').style.display = 'flex';
 }
 
-// 添加班次项到容器
-function addClassItemToContainer(classType, school, index) {
+// 添加班次项到容器（适配考点更换的双下拉）
+function addClassItemToContainer(classType, school, fromSchool, toSchool, index, isDoubleSelect) {
   const container = document.getElementById('classItemsContainer');
   const item = document.createElement('div');
-  item.className = 'class-item';
+  item.className = `class-item ${isDoubleSelect ? 'double-select' : ''}`;
   item.dataset.index = index;
   
-  // 班次选择
+  // 班次选择下拉
   const classSelect = document.createElement('select');
   classSelect.innerHTML = classTypes.map(type => `<option value="${type}" ${type === classType ? 'selected' : ''}>${type}</option>`).join('');
-  
-  // 学校选择
-  const schoolSelect = document.createElement('select');
-  schoolSelect.innerHTML = schoolList.map(schoolItem => `<option value="${schoolItem}" ${schoolItem === school ? 'selected' : ''}>${schoolItem}</option>`).join('');
-  
-  // 删除按钮
-  const delBtn = document.createElement('button');
-  delBtn.innerText = '删除';
-  delBtn.onclick = function() {
+  // 监听班次类型变化，自动切换单/双下拉
+  classSelect.onchange = function() {
+    const newType = this.value;
+    const isNewDouble = newType.includes('考点更换');
+    // 重新渲染当前项
+    const currentIndex = item.dataset.index;
     container.removeChild(item);
+    addClassItemToContainer(newType, '', '', '', currentIndex, isNewDouble);
   };
 
-  item.appendChild(classSelect);
-  item.appendChild(schoolSelect);
-  item.appendChild(delBtn);
+  if(!isDoubleSelect) {
+    // 普通班次：单下拉
+    const schoolSelect = document.createElement('select');
+    schoolSelect.innerHTML = schoolList.map(schoolItem => `<option value="${schoolItem}" ${schoolItem === school ? 'selected' : ''}>${schoolItem}</option>`).join('');
+    
+    // 删除按钮
+    const delBtn = document.createElement('button');
+    delBtn.innerText = '删除';
+    delBtn.onclick = function() {
+      container.removeChild(item);
+    };
+
+    item.appendChild(classSelect);
+    item.appendChild(schoolSelect);
+    item.appendChild(delBtn);
+  } else {
+    // 考点更换：双下拉（出发+送达）
+    item.appendChild(classSelect);
+    
+    // 出发学校
+    const fromGroup = document.createElement('div');
+    fromGroup.className = 'select-group';
+    fromGroup.innerHTML = `<label>出发学校</label>`;
+    const fromSelect = document.createElement('select');
+    fromSelect.innerHTML = schoolList.map(schoolItem => `<option value="${schoolItem}" ${schoolItem === fromSchool ? 'selected' : ''}>${schoolItem}</option>`).join('');
+    fromGroup.appendChild(fromSelect);
+    item.appendChild(fromGroup);
+
+    // 送达学校
+    const toGroup = document.createElement('div');
+    toGroup.className = 'select-group';
+    toGroup.innerHTML = `<label>送达学校</label>`;
+    const toSelect = document.createElement('select');
+    toSelect.innerHTML = schoolList.map(schoolItem => `<option value="${schoolItem}" ${schoolItem === toSchool ? 'selected' : ''}>${schoolItem}</option>`).join('');
+    toGroup.appendChild(toSelect);
+    item.appendChild(toGroup);
+
+    // 删除按钮
+    const delBtn = document.createElement('button');
+    delBtn.innerText = '删除';
+    delBtn.onclick = function() {
+      container.removeChild(item);
+    };
+    item.appendChild(delBtn);
+  }
+
   container.appendChild(item);
 }
 
-// 添加班次项
+// 添加新的班次项
 function addClassItem() {
   const container = document.getElementById('classItemsContainer');
   const index = container.children.length;
-  addClassItemToContainer(classTypes[0], schoolList[0], index);
+  // 默认添加第一个班次（单下拉）
+  addClassItemToContainer(classTypes[0], schoolList[0], '', '', index, false);
 }
 
 // 关闭修改弹窗
@@ -664,22 +785,61 @@ function saveEditOrder() {
   const name = document.getElementById('editName').value.trim();
   const phone = document.getElementById('editPhone').value.trim();
   
+  // 验证姓名
   if(!name) {
     alert('姓名不能为空');
+    return;
+  }
+  if(!validateName(name)) {
+    alert('请输入2-5个有效的汉字姓名');
+    return;
+  }
+
+  // 验证电话
+  if(!phone) {
+    alert('联系电话不能为空');
+    return;
+  }
+  if(!validatePhone(phone)) {
+    alert('请输入有效的11位手机号码');
     return;
   }
 
   // 收集班次数据
   const classItems = document.querySelectorAll('#classItemsContainer .class-item');
+  if(classItems.length === 0) {
+    alert('请至少选择一个乘坐班次');
+    return;
+  }
+
   const carList = [];
   classItems.forEach(item => {
     const classType = item.querySelector('select:first-child').value;
-    const school = item.querySelector('select:last-child').value;
-    carList.push({
-      name: classType,
-      school: school
-    });
+    const isDoubleSelect = item.classList.contains('double-select');
+    
+    if(!isDoubleSelect) {
+      // 普通班次：单学校
+      const school = item.querySelector('select:nth-child(2)').value;
+      carList.push({
+        name: classType,
+        school: school,
+        price: classType.includes('考点更换') ? 3 : 20 // 匹配前端价格
+      });
+    } else {
+      // 考点更换：双学校
+      const fromSchool = item.querySelector('.select-group:first-child select').value;
+      const toSchool = item.querySelector('.select-group:last-child select').value;
+      carList.push({
+        name: classType,
+        from: fromSchool,
+        to: toSchool,
+        price: 3 // 考点更换固定3元
+      });
+    }
   });
+
+  // 计算总金额
+  const total = carList.reduce((sum, item) => sum + Number(item.price), 0);
 
   // 构建修改数据
   const editData = {
@@ -688,7 +848,9 @@ function saveEditOrder() {
     userName: name,
     userPhone: phone,
     carList: carList,
-    remark: "已修改" // 备注改为已修改
+    total: total,
+    remark: "已修改", // 备注改为“已修改”
+    rowClass: "row-modified" // 行样式改为蓝色
   };
 
   // 提交修改
@@ -707,9 +869,8 @@ function saveEditOrder() {
     if(res.code===0){
       alert('修改成功！');
       closeEditModal();
-      // 重新加载数据
+      // 重新加载数据（自动应用蓝色样式和“已修改”备注）
       load();
-      // 修改后行标蓝（重新加载后会自动处理）
     }else if(res.code===-2){
       alert('密码错误，修改失败');
       logout();
