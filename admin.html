@@ -52,7 +52,7 @@
     text-align:center;
     font-size: 20px;
   }
-  /* 新增：状态说明文字样式（带颜色图标） */
+  /* 状态说明文字样式（带颜色图标） */
   .status-desc {
     text-align: left;
     font-size: 14px;
@@ -80,7 +80,7 @@
   .tag-red {
     background-color: #fff2f0;
   }
-  /* 新增：数据库修改说明文字 */
+  /* 数据库修改说明文字 */
   .db-modify-desc {
     text-align: left;
     font-size: 13px;
@@ -112,7 +112,7 @@
   }
   .tools{
     display:flex;
-    gap:8px; /* 缩小按钮间隔，不要太远 */
+    gap:8px;
     margin-bottom:15px;
     align-items:center;
     justify-content:space-between;
@@ -126,7 +126,18 @@
     border-radius:5px;
     cursor:pointer;
   }
-  button.del-btn{background:#dc3545}
+  /* 新增：刷新金额按钮样式 */
+  .refresh-amount-btn {
+    background: #28a745;
+    padding: 6px 10px;
+    font-size: 12px;
+    margin-right: 5px;
+  }
+  button.del-btn{
+    background:#dc3545;
+    padding: 6px 10px;
+    font-size: 12px;
+  }
   button.exit-btn{background:#6c757d}
   .table-container{
     overflow-x: auto;
@@ -134,7 +145,7 @@
   }
   table{
     width:100%;
-    min-width: 1400px;
+    min-width: 1500px; /* 加宽表格，适配新增按钮 */
     border-collapse:collapse;
   }
   th,td{
@@ -152,7 +163,7 @@
   .paytype-col{width:100px}
   .pay-record-col{width: 250px;}
   .money-col{width:80px}
-  .oper-col{width:80px}
+  .oper-col{width:120px;} /* 加宽操作列 */
   .class-col{width:120px}
   .remark-col{width:150px}
   /* 支付记录换行显示 */
@@ -164,10 +175,40 @@
   }
   /* 行标色样式 */
   .row-multiple {
-    background-color: #e6f7ff; /* 蓝色：多次提交 */
+    background-color: #e6f7ff;
   }
   .row-modified {
-    background-color: #fff2f0; /* 红色：手动修改 */
+    background-color: #fff2f0;
+  }
+  /* 弹窗样式 */
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+  }
+  .modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+  }
+  .modal-btn {
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
   }
 </style>
 </head>
@@ -181,15 +222,16 @@
 
 <div class="container" id="adminBox">
   <h1>订单管理</h1>
-  <!-- 优化1：带颜色图标的状态说明 -->
+  <!-- 带颜色图标的状态说明 -->
   <div class="status-desc">
     <span class="color-tag tag-white"></span>白色：只提交一次　
     <span class="color-tag tag-blue"></span>蓝色：多次提交　
     <span class="color-tag tag-red"></span>红色：班次有修改
   </div>
-  <!-- 优化2：新增数据库修改说明文字 -->
+  <!-- 数据库修改说明文字 -->
   <div class="db-modify-desc">
-    在数据库中手动修改某条订单的班次后，需要把该订单的 isModified 字段设为 true，这样后台页面就会标红
+    1. 在数据库中手动修改某条订单的班次（新增/删除）后，需要点击「刷新金额」按钮同步金额；<br>
+    2. 修改完成后需把该订单的 isModified 字段设为 true，后台页面会标红
   </div>
   <div class="search-tools">
     <input type="text" id="searchName" placeholder="姓名查询">
@@ -198,7 +240,6 @@
     <button onclick="resetSearch()">重置</button>
   </div>
   <div class="tools">
-    <!-- 优化3：导出Excel按钮在刷新右侧，间隔8px（不远） -->
     <div style="display: flex; gap: 8px;">
       <button onclick="load()">刷新</button>
       <button onclick="exportExcel()">导出Excel</button>
@@ -227,6 +268,15 @@
       </thead>
       <tbody id="list"></tbody>
     </table>
+  </div>
+</div>
+
+<!-- 操作结果弹窗 -->
+<div class="modal" id="resultModal">
+  <div class="modal-content">
+    <h3 id="modalTitle">操作结果</h3>
+    <p id="modalMsg" style="margin: 15px 0; line-height: 1.6;"></p>
+    <button class="modal-btn" onclick="closeModal()">确定</button>
   </div>
 </div>
 
@@ -274,14 +324,53 @@ async function load() {
     const res = await fetch(`${SERVER_URL}/api/getAllOrders?pwd=${PWD}`);
     const data = await res.json();
     if(data.code !== 0) { 
-      alert(data.msg); 
+      showModal('操作提示', data.msg);
       return; 
     }
     orderData = data.data;
     filteredOrderData = [...orderData];
     renderTable();
   } catch (err) {
-    alert('加载失败：' + err.message);
+    showModal('错误', '加载失败：' + err.message);
+  }
+}
+
+// 显示弹窗
+function showModal(title, msg) {
+  document.getElementById('modalTitle').innerText = title;
+  document.getElementById('modalMsg').innerText = msg;
+  document.getElementById('resultModal').style.display = 'flex';
+}
+
+// 关闭弹窗
+function closeModal() {
+  document.getElementById('resultModal').style.display = 'none';
+  load(); // 关闭弹窗后刷新表格
+}
+
+// 核心：刷新订单金额
+async function refreshAmount(orderId) {
+  if(!confirm('确定要刷新该订单的金额吗？\n（会根据当前班次重新计算并更新数据库）')) {
+    return;
+  }
+  
+  try {
+    const res = await fetch(`${SERVER_URL}/api/recalculateAmount`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        pwd: PWD,
+        orderId: orderId
+      })
+    });
+    const data = await res.json();
+    if(data.code === 0) {
+      showModal('成功', data.msg);
+    } else {
+      showModal('失败', data.msg);
+    }
+  } catch (err) {
+    showModal('错误', '刷新金额失败：' + err.message);
   }
 }
 
@@ -300,12 +389,12 @@ function renderTable() {
     
     // 行标色逻辑
     if(order.isModified) {
-      tr.className = 'row-modified'; // 红色：手动修改
+      tr.className = 'row-modified';
     } else if(order.submitCount && order.submitCount > 1) {
-      tr.className = 'row-multiple'; // 蓝色：多次提交
+      tr.className = 'row-multiple';
     }
     
-    // 封装获取班次信息的函数（按固定顺序）
+    // 封装获取班次信息的函数
     const getClassInfo = (name) => {
       const item = order.carList.find(i => i.name === name);
       if(!item) return '-';
@@ -328,7 +417,7 @@ function renderTable() {
       <td>${order.userPhone || '-'}</td>
       <td>${order.payType || '-'}</td>
       <td class="pay-record">${formatPaymentRecords()}</td>
-      <td>${order.total || 0}</td>
+      <td>${order.total || 0} 元</td>
       <td>${order.createTime || '-'}</td>
       <td>${getClassInfo('4月11日早送')}</td>
       <td>${getClassInfo('4月11日晚接')}</td>
@@ -336,7 +425,10 @@ function renderTable() {
       <td>${getClassInfo('4月12日晚接')}</td>
       <td>${getClassInfo('4月11日中午考点更换')}</td>
       <td>${getClassInfo('4月12日中午考点更换')}</td>
-      <td><button class="del-btn" onclick="deleteOrder('${order._id}')">删除</button></td>
+      <td>
+        <button class="refresh-amount-btn" onclick="refreshAmount('${order.orderId}')">刷新金额</button>
+        <button class="del-btn" onclick="deleteOrder('${order._id}')">删除</button>
+      </td>
     `;
     list.appendChild(tr);
   });
@@ -352,10 +444,9 @@ async function deleteOrder(id) {
       body: JSON.stringify({ pwd: PWD, id })
     });
     const data = await res.json();
-    alert(data.msg);
-    load();
+    showModal(data.code === 0 ? '成功' : '失败', data.msg);
   } catch (err) {
-    alert('删除失败：' + err.message);
+    showModal('错误', '删除失败：' + err.message);
   }
 }
 
@@ -382,7 +473,7 @@ function resetSearch() {
 // 导出Excel
 function exportExcel() {
   if(filteredOrderData.length === 0) { 
-    alert('暂无数据可导出'); 
+    showModal('提示', '暂无数据可导出');
     return; 
   }
   
@@ -406,7 +497,7 @@ function exportExcel() {
       电话: o.userPhone || '-',
       最后支付方式: o.payType || '-',
       支付记录: getPaymentRecords(),
-      总金额: o.total || 0,
+      总金额: o.total || 0 + ' 元',
       最后提交时间: o.createTime || '-',
       '4月11日早送': getInfo('4月11日早送'),
       '4月11日晚接': getInfo('4月11日晚接'),
@@ -423,6 +514,7 @@ function exportExcel() {
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, '订单列表');
   XLSX.writeFile(wb, `订单列表_${new Date().toLocaleDateString()}.xlsx`);
+  showModal('成功', 'Excel导出成功！');
 }
 </script>
 </body>
