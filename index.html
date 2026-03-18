@@ -541,12 +541,12 @@
             if(type === 'wechat'){
                 qrTitle.innerText = `微信收款码 | 需支付：${total} 元`;
                 // ✅ 修复：https + 英文引号
-                qrImg.src = 'https://st396007077.github.io/images/WX.png';
+                qrImg.src = 'https://st396007077.github.io/st.github.io/images/WX.png';
                 payTip.innerText = '请保存二维码到微信扫码完成支付';
             }else{
                 qrTitle.innerText = `支付宝收款码 | 需支付：${total} 元`;
                 // ✅ 修复：https + 英文引号
-                qrImg.src = 'https://st396007077.github.io/images/ZFB.png';
+                qrImg.src = 'https://st396007077.github.io/st.github.io/images/ZFB.png';
                 payTip.innerText = '请保存二维码到支付宝扫码完成支付';
             }
             qrModal.style.display = 'flex';
