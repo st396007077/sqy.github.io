@@ -409,7 +409,7 @@
         <div class="modal-content">
             <h3>请选择支付方式</h3>
             <div class="modal-btns">
-                <button class="wechat-btn" onclick="showQR('wechat')">微信支付</button>
+                <button class="wechat-btn" onclick="showQR('wechat')">微信</button>
                 <button class="alipay-btn" onclick="showQR('alipay')">支付宝</button>
             </div>
         </div>
@@ -568,7 +568,7 @@
             const payTip = document.getElementById('payTip');
             
             // ✅ 新增：记录选择的支付方式
-            selectedPayType = type === 'wechat' ? '微信支付' : '支付宝支付';
+            selectedPayType = type === 'wechat' ? '微信' : '支付宝';
             
             if(type === 'wechat'){
                 qrTitle.innerText = `微信收款码 | 需支付：${total} 元`;
