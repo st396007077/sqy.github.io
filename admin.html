@@ -52,34 +52,6 @@
     text-align:center;
     font-size: 20px;
   }
-  /* 颜色说明样式 */
-  .color-desc{
-    margin-bottom:15px;
-    padding:8px 10px;
-    background:#f8f9fa;
-    border-radius:5px;
-    font-size:13px;
-    color:#666;
-    text-align: left; /* 左对齐 */
-  }
-  .color-desc span{
-    display:inline-block;
-    margin-right:15px;
-  }
-  .color-desc span i{
-    display:inline-block;
-    width:12px;
-    height:12px;
-    border-radius:2px;
-    margin-right:5px;
-    vertical-align:middle;
-  }
-  .color-normal i{background:white;border:1px solid #ddd;}
-  .color-modified i{background:#cce5ff;}
-  .color-multi i{background:#d4edda;}
-  .color-repeat i{background:#f8d7da;}
-
-  /* 查询工具样式 */
   .search-tools{
     display:flex;
     gap:10px;
@@ -101,7 +73,6 @@
     border-radius:5px;
     cursor:pointer;
   }
-
   .tools{
     display:flex;
     gap:10px;
@@ -109,10 +80,6 @@
     align-items:center;
     justify-content:space-between;
     flex-wrap: wrap;
-  }
-  .tools-right{
-    display:flex;
-    gap:10px;
   }
   button{
     padding:8px 16px;
@@ -124,124 +91,71 @@
   }
   button.del-btn{background:#dc3545}
   button.exit-btn{background:#6c757d}
-  
   .table-container{
     overflow-x: auto;
-    margin: 10px 0;
-    border-radius: 5px;
-    box-shadow: 0 1px 3px #00000010;
-    width: 100%;
+    margin:10px 0;
   }
   table{
-    width: 100%;
-    min-width: 1200px;
-    border-collapse: collapse;
+    width:100%;
+    min-width:1200px;
+    border-collapse:collapse;
   }
   th,td{
     border:1px solid #ddd;
-    padding: 8px 6px;
-    text-align: center;
-    white-space: nowrap;
+    padding:8px 6px;
+    text-align:center;
+    white-space:nowrap;
+    font-size:13px;
   }
-  th{
-    background:#f8f9fa;
-    font-size: 14px;
-  }
-  td{
-    font-size: 13px;
-  }
-  .id-col{width: 80px !important;}
-  .time-col{width: 150px !important;}
-  .name-col{width: 80px !important;}
-  .phone-col{width: 110px !important;}
-  .paytype-col{width: 100px !important;}
-  .money-col{width: 80px !important;}
-  .oper-col{width: 80px !important;} /* 缩减操作列宽度 */
-  .class-col{width: 120px !important;}
-  .remark-col{width: 150px !important;} /* 备注列宽度 */
-  .empty-cell{color: #999;}
-
-  /* 行颜色样式 */
-  .row-modified{background-color: #cce5ff !important;} /* 蓝色：修改过 */
-  .row-multi{background-color: #d4edda !important;} /* 绿色：多次提交 */
-  .row-repeat{background-color: #f8d7da !important;} /* 红色：重复班次 */
-
-  @media (max-width: 768px) {
-    .container{
-      width: 99%;
-      padding: 15px 10px;
-    }
-    .tools, .search-tools{
-      flex-direction: column;
-      align-items: flex-start;
-    }
-    .tools-right, .search-tools button{
-      margin-top: 10px;
-      width: 100%;
-      justify-content: flex-end;
-    }
-    .search-tools input{
-      width: 100%;
-    }
-  }
+  th{background:#f8f9fa}
+  .id-col{width:80px}
+  .time-col{width:150px}
+  .name-col{width:80px}
+  .phone-col{width:110px}
+  .paytype-col{width:100px}
+  .money-col{width:80px}
+  .oper-col{width:80px}
+  .class-col{width:120px}
+  .remark-col{width:150px}
 </style>
 </head>
-<body>
 
-<!-- 登录界面 -->
+<body>
 <div class="login" id="loginBox">
   <h2>后台登录</h2>
   <input type="password" id="pwd" placeholder="请输入管理密码">
   <button onclick="login()">登录</button>
 </div>
 
-<!-- 管理界面 -->
 <div class="container" id="adminBox">
   <h1>订单管理</h1>
-  <!-- 颜色说明（左对齐） -->
-  <div class="color-desc">
-    <span class="color-normal"><i></i>白色：正常</span>
-    <span class="color-modified"><i></i>蓝色：修改过</span>
-    <span class="color-multi"><i></i>绿色：多次提交</span>
-    <span class="color-repeat"><i></i>红色：重复提交同一班次</span>
-  </div>
-  
-  <!-- 查询工具：姓名/电话模糊查询 -->
   <div class="search-tools">
-    <input type="text" id="searchName" placeholder="请输入姓名查询（模糊匹配）">
-    <input type="text" id="searchPhone" placeholder="请输入联系电话查询（模糊匹配）">
+    <input type="text" id="searchName" placeholder="姓名查询">
+    <input type="text" id="searchPhone" placeholder="电话查询">
     <button onclick="searchOrders()">查询</button>
     <button onclick="resetSearch()">重置</button>
   </div>
-
   <div class="tools">
-    <div class="tools-left">
-      <button onclick="load()">刷新</button>
-      <button onclick="exportExcel()">导出 Excel</button>
-    </div>
-    <div class="tools-right">
-      <button class="exit-btn" onclick="logout()">退出登录</button>
-    </div>
+    <button onclick="load()">刷新</button>
+    <button onclick="exportExcel()">导出Excel</button>
+    <button class="exit-btn" onclick="logout()">退出</button>
   </div>
-  
-  <!-- 表格容器 -->
   <div class="table-container">
     <table>
       <thead>
         <tr>
           <th class="id-col">订单ID</th>
           <th class="name-col">姓名</th>
-          <th class="phone-col">联系电话</th>
+          <th class="phone-col">电话</th>
           <th class="paytype-col">支付方式</th>
-          <th class="money-col">金额(元)</th>
+          <th class="money-col">金额</th>
           <th class="time-col">提交时间</th>
           <th class="class-col">4月11日早送</th>
           <th class="class-col">4月11日晚接</th>
           <th class="class-col">4月12日早送</th>
           <th class="class-col">4月12日晚接</th>
-          <th class="class-col">4月11日中午考点更换</th>
-          <th class="class-col">4月12日中午考点更换</th>
-          <th class="remark-col">备注</th>
+          <th class="class-col">4月11日中午更换</th>
+          <th class="class-col">4月12日中午更换</th>
           <th class="oper-col">操作</th>
         </tr>
       </thead>
@@ -252,42 +166,10 @@
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <script>
-// 替换为你的Render后端地址
 const SERVER_URL = "https://zikaocar-server.onrender.com";
 const PWD = "sutong5560";
-
-let orderData = []; // 原始订单数据
-let filteredOrderData = []; // 筛选后的订单数据
-
-// 班次列表（与前端保持一致）
-const classTypes = [
-  "4月11日早送",
-  "4月11日晚接",
-  "4月12日早送",
-  "4月12日晚接",
-  "4月11日中午考点更换",
-  "4月12日中午考点更换"
-];
-
-// 学校列表（与前端保持一致）
-const schoolList = [
-  "XX职业技术学院", 
-  "XX师范大学", 
-  "XX理工学院", 
-  "XX财经大学"
-];
-
-// 验证姓名（2-5个汉字）
-function validateName(name) {
-  const reg = /^[\u4e00-\u9fa5]{2,5}$/;
-  return reg.test(name);
-}
-
-// 验证手机号码
-function validatePhone(phone) {
-  const reg = /^1[3-9]\d{9}$/;
-  return reg.test(phone);
-}
+let orderData = [];
+let filteredOrderData = [];
 
 // 登录
 function login(){
@@ -298,141 +180,25 @@ function login(){
   load();
 }
 
-// 退出登录
+// 退出
 function logout(){
-  if(confirm('确定要退出登录吗？')){
+  if(confirm('确定退出？')){
     document.getElementById('loginBox').style.display = 'block';
     document.getElementById('adminBox').style.display = 'none';
-    document.getElementById('pwd').value = '';
-    orderData = [];
-    filteredOrderData = [];
   }
 }
 
-// 解析班次数据（适配考点更换的双学校格式）
-function parseClassData(carList) {
-  const classMap = {
-    "4月11日早送": "-",
-    "4月11日晚接": "-",
-    "4月12日早送": "-",
-    "4月12日晚接": "-",
-    "4月11日中午考点更换": "-",
-    "4月12日中午考点更换": "-"
-  };
-
-  carList.forEach(item => {
-    const className = item.name;
-    let content = "-";
-    if(item.school) {
-      content = item.school;
-    } else if(item.from && item.to) {
-      content = `${item.from}→${item.to}`;
-    }
-    // 重复班次只保留第一个（避免表格单元格重复显示）
-    if(classMap[className] === "-") {
-      classMap[className] = content;
-    }
-  });
-
-  return classMap;
-}
-
-// 检测重复数据和重复班次（核心逻辑）
-function processOrderData(orders) {
-  // 1. 按姓名+电话分组（空值不参与分组）
-  const groupMap = {};
-  orders.forEach(order => {
-    const name = (order.userName || '').trim();
-    const phone = (order.userPhone || '').trim();
-    if(!name || !phone) {
-      // 姓名/电话为空的订单不合并，单独处理
-      const key = `empty_${order.id}`;
-      groupMap[key] = [order];
-      return;
-    }
-    const key = `${name}_${phone}`;
-    if(!groupMap[key]) {
-      groupMap[key] = [];
-    }
-    groupMap[key].push(order);
-  });
-
-  const processedOrders = [];
-  
-  // 2. 处理每组数据
-  Object.values(groupMap).forEach(group => {
-    if(group.length === 1) {
-      // 单条数据：检测是否有重复班次
-      const order = { ...group[0] };
-      const classNames = order.carList.map(item => item.name);
-      // 检测是否有重复班次（同一班次出现多次）
-      const hasRepeatClass = classNames.some((name, index) => classNames.indexOf(name) !== index);
-      
-      // 设置备注和行样式
-      if(hasRepeatClass) {
-        order.remark = "重复提交同一班次";
-        order.rowClass = "row-repeat"; // 红色
-      } else {
-        order.remark = order.remark || ""; // 保留原有备注
-        order.rowClass = order.rowClass || ""; // 保留原有样式
-      }
-      processedOrders.push(order);
-    } else {
-      // 多条数据：合并为一行
-      const firstOrder = { ...group[0] };
-      // 合并所有班次
-      const allCarList = [];
-      const classNames = [];
-      let hasRepeatClass = false;
-      
-      group.forEach(order => {
-        order.carList.forEach(item => {
-          allCarList.push(item);
-          // 检测是否有重复班次
-          if(classNames.includes(item.name)) {
-            hasRepeatClass = true;
-          }
-          classNames.push(item.name);
-        });
-      });
-
-      // 构建合并后的订单
-      const mergedOrder = {
-        ...firstOrder,
-        carList: allCarList,
-        mergedOrders: group, // 保存合并的原始订单ID
-        remark: "多次提交订单",
-        rowClass: "row-multi" // 绿色
-      };
-      
-      if(hasRepeatClass) {
-        mergedOrder.remark += "（含重复班次）";
-      }
-      
-      processedOrders.push(mergedOrder);
-    }
-  });
-
-  return processedOrders;
-}
-
-// 加载订单数据
+// 加载订单
 async function load() {
   try {
     const res = await fetch(`${SERVER_URL}/api/getAllOrders?pwd=${PWD}`);
     const data = await res.json();
-    if(data.code !== 0) {
-      alert(data.msg || '加载失败');
-      return;
-    }
-    
-    // 处理订单数据（检测重复）
-    orderData = processOrderData(data.data);
-    filteredOrderData = [...orderData]; // 初始化筛选数据
+    if(data.code !== 0) { alert(data.msg); return; }
+    orderData = data.data;
+    filteredOrderData = [...orderData];
     renderTable();
   } catch (err) {
-    console.error('加载订单失败：', err);
-    alert('加载订单失败，请稍后重试');
+    alert('加载失败');
   }
 }
 
@@ -440,102 +206,66 @@ async function load() {
 function renderTable() {
   const list = document.getElementById('list');
   list.innerHTML = '';
-  
   if(filteredOrderData.length === 0) {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td colspan="14" style="padding:20px;">暂无订单数据</td>`;
-    list.appendChild(tr);
+    list.innerHTML = '<tr><td colspan="13">暂无数据</td></tr>';
     return;
   }
-  
   filteredOrderData.forEach(order => {
-    const classMap = parseClassData(order.carList);
     const tr = document.createElement('tr');
-    if(order.rowClass) {
-      tr.className = order.rowClass;
-    }
-    
-    // 构建单元格内容
-    const cells = [
-      `<td>${order.orderId || '-'}</td>`,
-      `<td>${order.userName || '-'}</td>`,
-      `<td>${order.userPhone || '-'}</td>`,
-      `<td>${order.payType || '-'}</td>`,
-      `<td>${order.total || 0}</td>`,
-      `<td>${order.createTime || '-'}</td>`,
-      `<td>${classMap["4月11日早送"] || '-'}</td>`,
-      `<td>${classMap["4月11日晚接"] || '-'}</td>`,
-      `<td>${classMap["4月12日早送"] || '-'}</td>`,
-      `<td>${classMap["4月12日晚接"] || '-'}</td>`,
-      `<td>${classMap["4月11日中午考点更换"] || '-'}</td>`,
-      `<td>${classMap["4月12日中午考点更换"] || '-'}</td>`,
-      `<td>${order.remark || '-'}</td>`,
-      // 操作列仅保留删除按钮
-      `<td>
-        <button class="del-btn" onclick="deleteOrder('${order.id}')">删除</button>
-      </td>`
-    ];
-    
-    tr.innerHTML = cells.join('');
+    const getClass = (name) => {
+      const item = order.carList.find(i => i.name === name);
+      if(!item) return '-';
+      if(item.school) return item.school;
+      if(item.from && item.to) return `${item.from}→${item.to}`;
+      return '-';
+    };
+    tr.innerHTML = `
+      <td>${order.orderId}</td>
+      <td>${order.userName}</td>
+      <td>${order.userPhone}</td>
+      <td>${order.payType}</td>
+      <td>${order.total}</td>
+      <td>${order.createTime}</td>
+      <td>${getClass('4月11日早送')}</td>
+      <td>${getClass('4月11日晚接')}</td>
+      <td>${getClass('4月12日早送')}</td>
+      <td>${getClass('4月12日晚接')}</td>
+      <td>${getClass('4月11日中午考点更换')}</td>
+      <td>${getClass('4月12日中午考点更换')}</td>
+      <td><button class="del-btn" onclick="deleteOrder('${order._id}')">删除</button></td>
+    `;
     list.appendChild(tr);
   });
 }
 
 // 删除订单
 async function deleteOrder(id) {
-  if(!confirm('确定要删除该订单吗？此操作不可恢复！')) {
-    return;
-  }
-  
+  if(!confirm('确定删除？')) return;
   try {
     const res = await fetch(`${SERVER_URL}/api/deleteOrder`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        pwd: PWD,
-        id: id
-      })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pwd: PWD, id })
     });
-    
     const data = await res.json();
-    if(data.code === 0) {
-      alert('删除成功');
-      load(); // 重新加载数据
-    } else if(data.code === -2) {
-      alert('密码错误');
-    } else {
-      alert(data.msg || '删除失败');
-    }
+    alert(data.msg);
+    load();
   } catch (err) {
-    console.error('删除订单失败：', err);
-    alert('删除失败，请稍后重试');
+    alert('删除失败');
   }
 }
 
-// 搜索订单（姓名/电话模糊匹配）
+// 搜索
 function searchOrders() {
-  const nameKeyword = document.getElementById('searchName').value.trim().toLowerCase();
-  const phoneKeyword = document.getElementById('searchPhone').value.trim();
-  
-  if(!nameKeyword && !phoneKeyword) {
-    filteredOrderData = [...orderData];
-    renderTable();
-    return;
-  }
-  
-  // 筛选逻辑
-  filteredOrderData = orderData.filter(order => {
-    const nameMatch = nameKeyword ? (order.userName || '').toLowerCase().includes(nameKeyword) : true;
-    const phoneMatch = phoneKeyword ? (order.userPhone || '').includes(phoneKeyword) : true;
-    return nameMatch && phoneMatch;
-  });
-  
+  const name = document.getElementById('searchName').value.trim();
+  const phone = document.getElementById('searchPhone').value.trim();
+  filteredOrderData = orderData.filter(o =>
+    (o.userName || '').includes(name) && (o.userPhone || '').includes(phone)
+  );
   renderTable();
 }
 
-// 重置搜索
+// 重置
 function resetSearch() {
   document.getElementById('searchName').value = '';
   document.getElementById('searchPhone').value = '';
@@ -545,44 +275,31 @@ function resetSearch() {
 
 // 导出Excel
 function exportExcel() {
-  if(filteredOrderData.length === 0) {
-    alert('暂无数据可导出');
-    return;
-  }
-  
-  // 构建Excel数据
-  const excelData = filteredOrderData.map(order => {
-    const classMap = parseClassData(order.carList);
+  if(filteredOrderData.length === 0) { alert('无数据'); return; }
+  const excel = filteredOrderData.map(o => {
+    const get = (n) => {
+      const i = o.carList.find(x=>x.name===n);
+      if(!i) return '-';
+      if(i.school) return i.school;
+      if(i.from&&i.to) return i.from+'→'+i.to;
+      return '-';
+    };
     return {
-      '订单ID': order.orderId || '-',
-      '姓名': order.userName || '-',
-      '联系电话': order.userPhone || '-',
-      '支付方式': order.payType || '-',
-      '金额(元)': order.total || 0,
-      '提交时间': order.createTime || '-',
-      '4月11日早送': classMap["4月11日早送"] || '-',
-      '4月11日晚接': classMap["4月11日晚接"] || '-',
-      '4月12日早送': classMap["4月12日早送"] || '-',
-      '4月12日晚接': classMap["4月12日晚接"] || '-',
-      '4月11日中午考点更换': classMap["4月11日中午考点更换"] || '-',
-      '4月12日中午考点更换': classMap["4月12日中午考点更换"] || '-',
-      '备注': order.remark || '-'
+      订单ID:o.orderId,姓名:o.userName,电话:o.userPhone,支付方式:o.payType,
+      金额:o.total,提交时间:o.createTime,
+      4月11日早送:get('4月11日早送'),
+      4月11日晚接:get('4月11日晚接'),
+      4月12日早送:get('4月12日早送'),
+      4月12日晚接:get('4月12日晚接'),
+      4月11日中午更换:get('4月11日中午考点更换'),
+      4月12日中午更换:get('4月12日中午考点更换')
     };
   });
-  
-  // 创建工作簿
-  const ws = XLSX.utils.json_to_sheet(excelData);
+  const ws = XLSX.utils.json_to_sheet(excel);
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, '订单数据');
-  
-  // 导出文件
-  XLSX.writeFile(wb, `自考专车订单_${new Date().toLocaleDateString()}.xlsx`);
+  XLSX.utils.book_append_sheet(wb,ws,'订单');
+  XLSX.writeFile(wb,'订单列表.xlsx');
 }
-
-// 页面加载时执行
-window.onload = function() {
-  // 初始化页面
-};
 </script>
 </body>
 </html>
