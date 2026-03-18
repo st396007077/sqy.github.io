@@ -105,7 +105,7 @@ function load(){
           <!-- 优化详情显示：包含班次+学校信息 -->
           <td class="detail-cell">${item.carList.map(i=>`${i.name}（班次：${i.class || '无'}，学校：${i.school || '无'}）`).join('，')}</td>
           <!-- 新增删除按钮 -->
-          <td><button class="del-btn" onclick="deleteOrder(${item.id})">删除</button></td>
+          <td><button class="del-btn" onclick="deleteOrder('${item.id}')">删除</button></td>
         </tr>
       `).join('');
       document.getElementById('list').innerHTML = html;
