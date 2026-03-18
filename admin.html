@@ -166,21 +166,25 @@
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <script>
+// 核心配置
 const SERVER_URL = "https://zikaocar-server.onrender.com";
 const PWD = "sutong5560";
 let orderData = [];
 let filteredOrderData = [];
 
-// 登录
+// 【修复核心】补充缺失的login函数
 function login(){
   const val = document.getElementById('pwd').value;
-  if(val !== PWD){alert('密码错误');return}
+  if(val !== PWD){
+    alert('密码错误');
+    return;
+  }
   document.getElementById('loginBox').style.display = 'none';
   document.getElementById('adminBox').style.display = 'block';
   load();
 }
 
-// 退出
+// 退出登录
 function logout(){
   if(confirm('确定退出？')){
     document.getElementById('loginBox').style.display = 'block';
@@ -188,50 +192,57 @@ function logout(){
   }
 }
 
-// 加载订单
+// 加载所有订单
 async function load() {
   try {
     const res = await fetch(`${SERVER_URL}/api/getAllOrders?pwd=${PWD}`);
     const data = await res.json();
-    if(data.code !== 0) { alert(data.msg); return; }
+    if(data.code !== 0) { 
+      alert(data.msg); 
+      return; 
+    }
     orderData = data.data;
     filteredOrderData = [...orderData];
     renderTable();
   } catch (err) {
-    alert('加载失败');
+    alert('加载失败：' + err.message);
   }
 }
 
-// 渲染表格
+// 渲染订单表格
 function renderTable() {
   const list = document.getElementById('list');
   list.innerHTML = '';
+  
   if(filteredOrderData.length === 0) {
     list.innerHTML = '<tr><td colspan="13">暂无数据</td></tr>';
     return;
   }
+  
   filteredOrderData.forEach(order => {
     const tr = document.createElement('tr');
-    const getClass = (name) => {
+    // 封装获取班次信息的函数
+    const getClassInfo = (name) => {
       const item = order.carList.find(i => i.name === name);
       if(!item) return '-';
       if(item.school) return item.school;
       if(item.from && item.to) return `${item.from}→${item.to}`;
       return '-';
     };
+    
     tr.innerHTML = `
-      <td>${order.orderId}</td>
-      <td>${order.userName}</td>
-      <td>${order.userPhone}</td>
-      <td>${order.payType}</td>
-      <td>${order.total}</td>
-      <td>${order.createTime}</td>
-      <td>${getClass('4月11日早送')}</td>
-      <td>${getClass('4月11日晚接')}</td>
-      <td>${getClass('4月12日早送')}</td>
-      <td>${getClass('4月12日晚接')}</td>
-      <td>${getClass('4月11日中午考点更换')}</td>
-      <td>${getClass('4月12日中午考点更换')}</td>
+      <td>${order.orderId || '-'}</td>
+      <td>${order.userName || '-'}</td>
+      <td>${order.userPhone || '-'}</td>
+      <td>${order.payType || '-'}</td>
+      <td>${order.total || 0}</td>
+      <td>${order.createTime || '-'}</td>
+      <td>${getClassInfo('4月11日早送')}</td>
+      <td>${getClassInfo('4月11日晚接')}</td>
+      <td>${getClassInfo('4月12日早送')}</td>
+      <td>${getClassInfo('4月12日晚接')}</td>
+      <td>${getClassInfo('4月11日中午考点更换')}</td>
+      <td>${getClassInfo('4月12日中午考点更换')}</td>
       <td><button class="del-btn" onclick="deleteOrder('${order._id}')">删除</button></td>
     `;
     list.appendChild(tr);
@@ -240,7 +251,7 @@ function renderTable() {
 
 // 删除订单
 async function deleteOrder(id) {
-  if(!confirm('确定删除？')) return;
+  if(!confirm('确定删除该订单？')) return;
   try {
     const res = await fetch(`${SERVER_URL}/api/deleteOrder`, {
       method: 'POST',
@@ -249,23 +260,25 @@ async function deleteOrder(id) {
     });
     const data = await res.json();
     alert(data.msg);
-    load();
+    load(); // 删除后刷新列表
   } catch (err) {
-    alert('删除失败');
+    alert('删除失败：' + err.message);
   }
 }
 
-// 搜索
+// 搜索订单
 function searchOrders() {
   const name = document.getElementById('searchName').value.trim();
   const phone = document.getElementById('searchPhone').value.trim();
-  filteredOrderData = orderData.filter(o =>
-    (o.userName || '').includes(name) && (o.userPhone || '').includes(phone)
+  
+  filteredOrderData = orderData.filter(o => 
+    (o.userName || '').includes(name) && 
+    (o.userPhone || '').includes(phone)
   );
   renderTable();
 }
 
-// 重置
+// 重置搜索
 function resetSearch() {
   document.getElementById('searchName').value = '';
   document.getElementById('searchPhone').value = '';
@@ -275,9 +288,13 @@ function resetSearch() {
 
 // 导出Excel
 function exportExcel() {
-  if(filteredOrderData.length === 0) { alert('无数据'); return; }
-  const excel = filteredOrderData.map(o => {
-    const get = (n) => {
+  if(filteredOrderData.length === 0) { 
+    alert('暂无数据可导出'); 
+    return; 
+  }
+  
+  const excelData = filteredOrderData.map(o => {
+    const getInfo = (n) => {
       const i = o.carList.find(x=>x.name===n);
       if(!i) return '-';
       if(i.school) return i.school;
@@ -285,20 +302,25 @@ function exportExcel() {
       return '-';
     };
     return {
-      订单ID:o.orderId,姓名:o.userName,电话:o.userPhone,支付方式:o.payType,
-      金额:o.total,提交时间:o.createTime,
-      4月11日早送:get('4月11日早送'),
-      4月11日晚接:get('4月11日晚接'),
-      4月12日早送:get('4月12日早送'),
-      4月12日晚接:get('4月12日晚接'),
-      4月11日中午更换:get('4月11日中午考点更换'),
-      4月12日中午更换:get('4月12日中午考点更换')
+      订单ID: o.orderId || '-',
+      姓名: o.userName || '-',
+      电话: o.userPhone || '-',
+      支付方式: o.payType || '-',
+      金额: o.total || 0,
+      提交时间: o.createTime || '-',
+      '4月11日早送': getInfo('4月11日早送'),
+      '4月11日晚接': getInfo('4月11日晚接'),
+      '4月12日早送': getInfo('4月12日早送'),
+      '4月12日晚接': getInfo('4月12日晚接'),
+      '4月11日中午更换': getInfo('4月11日中午考点更换'),
+      '4月12日中午更换': getInfo('4月12日中午考点更换')
     };
   });
-  const ws = XLSX.utils.json_to_sheet(excel);
+  
+  const ws = XLSX.utils.json_to_sheet(excelData);
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,'订单');
-  XLSX.writeFile(wb,'订单列表.xlsx');
+  XLSX.utils.book_append_sheet(wb, ws, '订单列表');
+  XLSX.writeFile(wb, `订单列表_${new Date().toLocaleDateString()}.xlsx`);
 }
 </script>
 </body>
