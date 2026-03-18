@@ -123,7 +123,6 @@
     cursor:pointer;
   }
   button.del-btn{background:#dc3545}
-  button.edit-btn{background:#28a745}
   button.exit-btn{background:#6c757d}
   
   .table-container{
@@ -157,7 +156,7 @@
   .phone-col{width: 110px !important;}
   .paytype-col{width: 100px !important;}
   .money-col{width: 80px !important;}
-  .oper-col{width: 120px !important;} /* 加宽操作列 */
+  .oper-col{width: 80px !important;} /* 缩减操作列宽度 */
   .class-col{width: 120px !important;}
   .remark-col{width: 150px !important;} /* 备注列宽度 */
   .empty-cell{color: #999;}
@@ -166,118 +165,6 @@
   .row-modified{background-color: #cce5ff !important;} /* 蓝色：修改过 */
   .row-multi{background-color: #d4edda !important;} /* 绿色：多次提交 */
   .row-repeat{background-color: #f8d7da !important;} /* 红色：重复班次 */
-
-  /* 弹窗样式 */
-  .modal{
-    position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
-    background:rgba(0,0,0,0.5);
-    display:none;
-    justify-content:center;
-    align-items:center;
-    z-index:9999;
-  }
-  .modal-content{
-    background:white;
-    padding:20px;
-    border-radius:8px;
-    width:90%;
-    max-width:800px;
-    max-height:90vh;
-    overflow-y:auto;
-  }
-  .modal-title{
-    font-size:16px;
-    font-weight:bold;
-    margin-bottom:15px;
-    padding-bottom:10px;
-    border-bottom:1px solid #eee;
-  }
-  .form-group{
-    margin-bottom:15px;
-  }
-  .form-group label{
-    display:block;
-    margin-bottom:5px;
-    font-size:14px;
-    font-weight:500;
-  }
-  .form-group input, .form-group select{
-    width:100%;
-    padding:8px 10px;
-    border:1px solid #ddd;
-    border-radius:5px;
-    font-size:14px;
-  }
-  /* 班次编辑区分组样式 */
-  .class-editor-group {
-    margin-bottom: 20px;
-    border:1px solid #ddd;
-    border-radius:5px;
-    padding:15px;
-  }
-  .class-editor-title {
-    font-size: 14px;
-    font-weight: bold;
-    margin-bottom: 10px;
-    color: #333;
-    padding-bottom: 5px;
-    border-bottom: 1px solid #eee;
-  }
-  .class-item{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    margin-bottom:8px;
-    padding:8px;
-    background:#f8f9fa;
-    border-radius:4px;
-  }
-  /* 考点更换特殊处理：双下拉框 */
-  .class-item.double-select {
-    flex-wrap: wrap;
-  }
-  .class-item.double-select .select-group {
-    flex: 1;
-    min-width: 150px;
-    margin-bottom: 5px;
-  }
-  .class-item.double-select .select-group label {
-    font-size: 12px;
-    margin-bottom: 3px;
-    color: #666;
-  }
-  .class-item select{
-    flex:1;
-    padding:6px;
-  }
-  .class-item button{
-    padding:6px 10px;
-    background:#dc3545;
-    font-size:12px;
-    white-space: nowrap;
-  }
-  .add-class-btn{
-    padding:6px 10px;
-    background:#28a745;
-    font-size:12px;
-    margin-bottom:10px;
-  }
-  .modal-footer{
-    display:flex;
-    gap:10px;
-    justify-content:flex-end;
-    margin-top:20px;
-  }
-  .modal-footer button{
-    padding:8px 20px;
-  }
-  .cancel-btn{
-    background:#6c757d;
-  }
 
   @media (max-width: 768px) {
     .container{
@@ -294,16 +181,6 @@
       justify-content: flex-end;
     }
     .search-tools input{
-      width: 100%;
-    }
-    .class-item {
-      flex-wrap: wrap;
-    }
-    .class-item select {
-      width: 100%;
-      margin-bottom: 5px;
-    }
-    .class-item button {
       width: 100%;
     }
   }
@@ -364,47 +241,12 @@
           <th class="class-col">4月12日晚接</th>
           <th class="class-col">4月11日中午考点更换</th>
           <th class="class-col">4月12日中午考点更换</th>
-          <th class="remark-col">备注</th> <!-- 新增备注列 -->
+          <th class="remark-col">备注</th>
           <th class="oper-col">操作</th>
         </tr>
       </thead>
       <tbody id="list"></tbody>
     </table>
-  </div>
-</div>
-
-<!-- 修改弹窗 -->
-<div class="modal" id="editModal">
-  <div class="modal-content">
-    <div class="modal-title">修改订单信息</div>
-    <input type="hidden" id="editOrderId">
-    <div class="form-group">
-      <label>姓名 <span style="color:red">*</span></label>
-      <input type="text" id="editName" placeholder="请输入2-5个汉字的真实姓名">
-    </div>
-    <div class="form-group">
-      <label>联系电话 <span style="color:red">*</span></label>
-      <input type="tel" id="editPhone" placeholder="请输入11位手机号码" maxlength="11">
-    </div>
-    <div class="form-group">
-      <label>乘坐班次</label>
-      <!-- 已报名班次区域 -->
-      <div class="class-editor-group">
-        <div class="class-editor-title">已报名班次</div>
-        <div id="existingClassItemsContainer"></div>
-        <div id="noExistingClassTip" style="color:#999; font-size:13px; text-align:center; padding:5px; display:none;">暂无已报名班次</div>
-      </div>
-      <!-- 添加新班次区域 -->
-      <div class="class-editor-group">
-        <div class="class-editor-title">添加新班次</div>
-        <button class="add-class-btn" onclick="addNewClassItem()">+ 添加新班次</button>
-        <div id="newClassItemsContainer"></div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="cancel-btn" onclick="closeEditModal()">取消</button>
-      <button onclick="saveEditOrder()">确定</button>
-    </div>
   </div>
 </div>
 
@@ -531,8 +373,8 @@ function processOrderData(orders) {
         order.remark = "重复提交同一班次";
         order.rowClass = "row-repeat"; // 红色
       } else {
-        order.remark = order.remark || ""; // 保留原有备注（如修改后的备注）
-        order.rowClass = order.rowClass || ""; // 保留原有样式（如修改后的蓝色）
+        order.remark = order.remark || ""; // 保留原有备注
+        order.rowClass = order.rowClass || ""; // 保留原有样式
       }
       processedOrders.push(order);
     } else {
@@ -559,10 +401,14 @@ function processOrderData(orders) {
         ...firstOrder,
         carList: allCarList,
         mergedOrders: group, // 保存合并的原始订单ID
-        // 备注和样式
-        remark: hasRepeatClass ? "重复提交同一班次" : "第二次及之后的提交内容",
-        rowClass: hasRepeatClass ? "row-repeat" : "row-multi" // 红色/绿色
+        remark: "多次提交订单",
+        rowClass: "row-multi" // 绿色
       };
+      
+      if(hasRepeatClass) {
+        mergedOrder.remark += "（含重复班次）";
+      }
+      
       processedOrders.push(mergedOrder);
     }
   });
@@ -570,456 +416,173 @@ function processOrderData(orders) {
   return processedOrders;
 }
 
-// 加载订单
-function load(){
-  const url = `${SERVER_URL}/api/getAllOrders?pwd=${encodeURIComponent(PWD)}`;
-  
-  fetch(url)
-  .then(res=>{
-    if(!res.ok) throw new Error(`接口请求失败：${res.status}`);
-    return res.json();
-  })
-  .then(res=>{
-    if(res.code===0){
-      orderData = res.data;
-      // 处理数据（合并、检测重复、设置样式）
-      const processedData = processOrderData(orderData);
-      filteredOrderData = processedData;
-      renderOrderList(filteredOrderData);
-    }else if(res.code===-2){
-      alert('密码错误，请重新登录');
-      logout();
-    }else{
-      alert(`加载失败：${res.msg || '未知错误'}`);
+// 加载订单数据
+async function load() {
+  try {
+    const res = await fetch(`${SERVER_URL}/api/getAllOrders?pwd=${PWD}`);
+    const data = await res.json();
+    if(data.code !== 0) {
+      alert(data.msg || '加载失败');
+      return;
     }
-  }).catch(err=>{
+    
+    // 处理订单数据（检测重复）
+    orderData = processOrderData(data.data);
+    filteredOrderData = [...orderData]; // 初始化筛选数据
+    renderTable();
+  } catch (err) {
     console.error('加载订单失败：', err);
-    alert(`加载订单失败：${err.message || '请检查后端服务是否正常'}`);
-  });
-}
-
-// 渲染订单列表
-function renderOrderList(orders) {
-  let html = '';
-  if(orders.length === 0) {
-    html = '<tr><td colspan="14" style="text-align:center;color:#999">暂无订单数据</td></tr>';
-  } else {
-    orders.forEach(item=>{
-      const classData = parseClassData(item.carList || []);
-      // 渲染行（带样式和备注）
-      html += `
-        <tr data-order-id="${item.id}" class="${item.rowClass || ''}">
-          <td class="id-col">${item.orderId || item.id || '-'}</td>
-          <td class="name-col">${item.userName || '-'}</td>
-          <td class="phone-col">${item.userPhone || '-'}</td>
-          <td class="paytype-col">${item.payType || '-'}</td>
-          <td class="money-col">${item.total || 0}</td>
-          <td class="time-col">${item.createTime || '-'}</td>
-          <td class="class-col ${classData['4月11日早送'] === '-' ? 'empty-cell' : ''}">${classData['4月11日早送']}</td>
-          <td class="class-col ${classData['4月11日晚接'] === '-' ? 'empty-cell' : ''}">${classData['4月11日晚接']}</td>
-          <td class="class-col ${classData['4月12日早送'] === '-' ? 'empty-cell' : ''}">${classData['4月12日早送']}</td>
-          <td class="class-col ${classData['4月12日晚接'] === '-' ? 'empty-cell' : ''}">${classData['4月12日晚接']}</td>
-          <td class="class-col ${classData['4月11日中午考点更换'] === '-' ? 'empty-cell' : ''}">${classData['4月11日中午考点更换']}</td>
-          <td class="class-col ${classData['4月12日中午考点更换'] === '-' ? 'empty-cell' : ''}">${classData['4月12日中午考点更换']}</td>
-          <td class="remark-col">${item.remark || '-'}</td>
-          <td class="oper-col">
-            <button class="edit-btn" onclick="openEditModal('${item.id}')">修改</button>
-            <button class="del-btn" onclick="deleteOrder('${item.id}')">删除</button>
-          </td>
-        </tr>
-      `;
-    });
+    alert('加载订单失败，请稍后重试');
   }
-  document.getElementById('list').innerHTML = html;
 }
 
-// 查询订单（姓名/电话模糊匹配）
-function searchOrders() {
-  const name = document.getElementById('searchName').value.trim().toLowerCase();
-  const phone = document.getElementById('searchPhone').value.trim();
+// 渲染表格
+function renderTable() {
+  const list = document.getElementById('list');
+  list.innerHTML = '';
   
-  if(!name && !phone) {
-    // 无查询条件：显示全部
-    filteredOrderData = processOrderData(orderData);
-    renderOrderList(filteredOrderData);
+  if(filteredOrderData.length === 0) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td colspan="14" style="padding:20px;">暂无订单数据</td>`;
+    list.appendChild(tr);
     return;
   }
-
-  // 筛选逻辑：姓名包含 或 电话包含（模糊匹配）
-  const filtered = filteredOrderData.filter(order => {
-    const orderName = (order.userName || '').toLowerCase();
-    const orderPhone = order.userPhone || '';
-    return (name ? orderName.includes(name) : true) && (phone ? orderPhone.includes(phone) : true);
-  });
-
-  renderOrderList(filtered);
-}
-
-// 重置查询
-function resetSearch() {
-  document.getElementById('searchName').value = '';
-  document.getElementById('searchPhone').value = '';
-  filteredOrderData = processOrderData(orderData);
-  renderOrderList(filteredOrderData);
-}
-
-// 打开修改弹窗
-function openEditModal(orderId) {
-  // 查找订单（兼容合并订单）
-  let order = orderData.find(item => item.id === orderId);
-  // 如果是合并订单，取第一个原始订单
-  if(!order && filteredOrderData.some(item => item.mergedOrders)) {
-    const mergedOrder = filteredOrderData.find(item => item.mergedOrders && item.mergedOrders.some(o => o.id === orderId));
-    if(mergedOrder) order = mergedOrder.mergedOrders[0];
-  }
   
-  if(!order) {
-    alert('订单不存在');
-    return;
-  }
-
-  // 填充表单
-  document.getElementById('editOrderId').value = orderId;
-  document.getElementById('editName').value = order.userName || '';
-  document.getElementById('editPhone').value = order.userPhone || '';
-
-  // 清空班次容器
-  const existingContainer = document.getElementById('existingClassItemsContainer');
-  const newContainer = document.getElementById('newClassItemsContainer');
-  existingContainer.innerHTML = '';
-  newContainer.innerHTML = '';
-
-  // 渲染已报名班次
-  const existingCarList = order.carList || [];
-  if (existingCarList.length === 0) {
-    document.getElementById('noExistingClassTip').style.display = 'block';
-  } else {
-    document.getElementById('noExistingClassTip').style.display = 'none';
-    existingCarList.forEach((item, index) => {
-      const isDoubleSelect = item.name.includes('考点更换'); // 考点更换显示双下拉
-      let schoolValue = item.school || '';
-      let fromSchool = item.from || '';
-      let toSchool = item.to || '';
-      addClassItemToContainer(
-        existingContainer, 
-        item.name, 
-        schoolValue, 
-        fromSchool, 
-        toSchool, 
-        `existing_${index}`, 
-        isDoubleSelect,
-        true // 标记为已报名班次
-      );
-    });
-  }
-
-  // 显示弹窗
-  document.getElementById('editModal').style.display = 'flex';
-}
-
-// 添加班次项到容器（适配考点更换的双下拉，区分已报名/新增）
-function addClassItemToContainer(container, classType, school, fromSchool, toSchool, index, isDoubleSelect, isExisting = false) {
-  const item = document.createElement('div');
-  item.className = `class-item ${isDoubleSelect ? 'double-select' : ''}`;
-  item.dataset.index = index;
-  
-  // 班次选择下拉（已报名班次禁用修改类型，新增班次可修改）
-  const classSelect = document.createElement('select');
-  classSelect.innerHTML = classTypes.map(type => `<option value="${type}" ${type === classType ? 'selected' : ''}>${type}</option>`).join('');
-  if (isExisting) {
-    classSelect.disabled = true; // 已报名班次禁止修改班次类型
-  } else {
-    // 新增班次监听类型变化，自动切换单/双下拉
-    classSelect.onchange = function() {
-      const newType = this.value;
-      const isNewDouble = newType.includes('考点更换');
-      // 重新渲染当前项
-      const currentIndex = item.dataset.index;
-      container.removeChild(item);
-      addClassItemToContainer(container, newType, '', '', '', currentIndex, isNewDouble);
-    };
-  }
-
-  if(!isDoubleSelect) {
-    // 普通班次：单下拉
-    const schoolSelect = document.createElement('select');
-    schoolSelect.innerHTML = schoolList.map(schoolItem => `<option value="${schoolItem}" ${schoolItem === school ? 'selected' : ''}>${schoolItem}</option>`).join('');
-    
-    // 删除按钮
-    const delBtn = document.createElement('button');
-    delBtn.innerText = '删除';
-    delBtn.onclick = function() {
-      container.removeChild(item);
-    };
-
-    item.appendChild(classSelect);
-    item.appendChild(schoolSelect);
-    item.appendChild(delBtn);
-  } else {
-    // 考点更换：双下拉（出发+送达）
-    item.appendChild(classSelect);
-    
-    // 出发学校
-    const fromGroup = document.createElement('div');
-    fromGroup.className = 'select-group';
-    fromGroup.innerHTML = `<label>出发学校</label>`;
-    const fromSelect = document.createElement('select');
-    fromSelect.innerHTML = schoolList.map(schoolItem => `<option value="${schoolItem}" ${schoolItem === fromSchool ? 'selected' : ''}>${schoolItem}</option>`).join('');
-    fromGroup.appendChild(fromSelect);
-    item.appendChild(fromGroup);
-
-    // 送达学校
-    const toGroup = document.createElement('div');
-    toGroup.className = 'select-group';
-    toGroup.innerHTML = `<label>送达学校</label>`;
-    const toSelect = document.createElement('select');
-    toSelect.innerHTML = schoolList.map(schoolItem => `<option value="${schoolItem}" ${schoolItem === toSchool ? 'selected' : ''}>${schoolItem}</option>`).join('');
-    toGroup.appendChild(toSelect);
-    item.appendChild(toGroup);
-
-    // 删除按钮
-    const delBtn = document.createElement('button');
-    delBtn.innerText = '删除';
-    delBtn.onclick = function() {
-      container.removeChild(item);
-    };
-    item.appendChild(delBtn);
-  }
-
-  container.appendChild(item);
-}
-
-// 添加新的班次项（用于新增区域）
-function addNewClassItem() {
-  const container = document.getElementById('newClassItemsContainer');
-  const index = `new_${container.children.length}`;
-  // 默认添加第一个班次（单下拉）
-  addClassItemToContainer(container, classTypes[0], schoolList[0], '', '', index, false);
-}
-
-// 关闭修改弹窗
-function closeEditModal() {
-  document.getElementById('editModal').style.display = 'none';
-  // 清空表单
-  document.getElementById('editOrderId').value = '';
-  document.getElementById('editName').value = '';
-  document.getElementById('editPhone').value = '';
-  document.getElementById('existingClassItemsContainer').innerHTML = '';
-  document.getElementById('newClassItemsContainer').innerHTML = '';
-  document.getElementById('noExistingClassTip').style.display = 'none';
-}
-
-// 收集班次数据（通用方法）
-function collectClassItems(container) {
-  const carList = [];
-  const classItems = container.querySelectorAll('.class-item');
-  
-  classItems.forEach(item => {
-    // 获取班次类型
-    const classSelect = item.querySelector('select:first-child');
-    if (!classSelect) return;
-    const classType = classSelect.value;
-    const isDoubleSelect = item.classList.contains('double-select');
-    
-    if(!isDoubleSelect) {
-      // 普通班次：单学校
-      const schoolSelect = item.querySelector('select:nth-child(2)');
-      if (!schoolSelect) return;
-      const school = schoolSelect.value;
-      carList.push({
-        name: classType,
-        school: school,
-        price: classType.includes('考点更换') ? 3 : 20 // 匹配前端价格
-      });
-    } else {
-      // 考点更换：双学校
-      const fromGroup = item.querySelector('.select-group:first-child');
-      const toGroup = item.querySelector('.select-group:last-child');
-      if (!fromGroup || !toGroup) return;
-      
-      const fromSelect = fromGroup.querySelector('select');
-      const toSelect = toGroup.querySelector('select');
-      if (!fromSelect || !toSelect) return;
-      
-      const fromSchool = fromSelect.value;
-      const toSchool = toSelect.value;
-      carList.push({
-        name: classType,
-        from: fromSchool,
-        to: toSchool,
-        price: 3 // 考点更换固定3元
-      });
+  filteredOrderData.forEach(order => {
+    const classMap = parseClassData(order.carList);
+    const tr = document.createElement('tr');
+    if(order.rowClass) {
+      tr.className = order.rowClass;
     }
-  });
-  
-  return carList;
-}
-
-// 保存修改的订单（修复考点更换数据提交问题）
-function saveEditOrder() {
-  const orderId = document.getElementById('editOrderId').value;
-  const name = document.getElementById('editName').value.trim();
-  const phone = document.getElementById('editPhone').value.trim();
-  
-  // 验证姓名
-  if(!name) {
-    alert('姓名不能为空');
-    return;
-  }
-  if(!validateName(name)) {
-    alert('请输入2-5个有效的汉字姓名');
-    return;
-  }
-
-  // 验证电话
-  if(!phone) {
-    alert('联系电话不能为空');
-    return;
-  }
-  if(!validatePhone(phone)) {
-    alert('请输入有效的11位手机号码');
-    return;
-  }
-
-  // 收集已报名班次数据
-  const existingContainer = document.getElementById('existingClassItemsContainer');
-  const existingCarList = collectClassItems(existingContainer);
-  
-  // 收集新增班次数据
-  const newContainer = document.getElementById('newClassItemsContainer');
-  const newCarList = collectClassItems(newContainer);
-  
-  // 合并所有班次数据
-  const carList = [...existingCarList, ...newCarList];
-  
-  // 校验：确保至少有一个班次
-  if (carList.length === 0) {
-    alert('请至少保留/添加一个乘坐班次');
-    return;
-  }
-
-  // 计算总金额
-  const total = carList.reduce((sum, item) => sum + Number(item.price), 0);
-
-  // 构建修改数据（确保数据格式完整）
-  const editData = {
-    pwd: PWD,
-    id: orderId,
-    userName: name,
-    userPhone: phone,
-    carList: carList, // 合并后的完整班次数据
-    total: total,
-    payType: orderData.find(o => o.id === orderId)?.payType || '未知', // 保留原有支付方式
-    createTime: orderData.find(o => o.id === orderId)?.createTime || new Date().toISOString(), // 保留原有创建时间
-    remark: "已修改", // 备注改为“已修改”
-    rowClass: "row-modified" // 行样式改为蓝色
-  };
-
-  // 提交修改
-  fetch(`${SERVER_URL}/api/updateOrder`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(editData)
-  })
-  .then(res=>{
-    if(!res.ok) throw new Error(`修改请求失败：${res.status}`);
-    return res.json();
-  })
-  .then(res=>{
-    if(res.code===0){
-      alert('修改成功！');
-      closeEditModal();
-      load(); // 重新加载数据
-    }else if(res.code===-2){
-      alert('密码错误，修改失败');
-      logout();
-    }else{
-      alert(`修改失败：${res.msg || '订单不存在'}`);
-    }
-  })
-  .catch(err=>{
-    console.error('修改订单失败：', err);
-    alert(`修改失败：${err.message || '请检查后端接口是否正常'}`);
+    
+    // 构建单元格内容
+    const cells = [
+      `<td>${order.orderId || '-'}</td>`,
+      `<td>${order.userName || '-'}</td>`,
+      `<td>${order.userPhone || '-'}</td>`,
+      `<td>${order.payType || '-'}</td>`,
+      `<td>${order.total || 0}</td>`,
+      `<td>${order.createTime || '-'}</td>`,
+      `<td>${classMap["4月11日早送"] || '-'}</td>`,
+      `<td>${classMap["4月11日晚接"] || '-'}</td>`,
+      `<td>${classMap["4月12日早送"] || '-'}</td>`,
+      `<td>${classMap["4月12日晚接"] || '-'}</td>`,
+      `<td>${classMap["4月11日中午考点更换"] || '-'}</td>`,
+      `<td>${classMap["4月12日中午考点更换"] || '-'}</td>`,
+      `<td>${order.remark || '-'}</td>`,
+      // 操作列仅保留删除按钮
+      `<td>
+        <button class="del-btn" onclick="deleteOrder('${order.id}')">删除</button>
+      </td>`
+    ];
+    
+    tr.innerHTML = cells.join('');
+    list.appendChild(tr);
   });
 }
 
 // 删除订单
-function deleteOrder(orderId){
-  if(!orderId || !confirm(`确定要删除订单【${orderId}】吗？此操作不可恢复！`)){
+async function deleteOrder(id) {
+  if(!confirm('确定要删除该订单吗？此操作不可恢复！')) {
     return;
   }
-
-  fetch(`${SERVER_URL}/api/deleteOrder`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ 
-      pwd: PWD,
-      id: orderId
-    })
-  })
-  .then(res=>{
-    if(!res.ok) throw new Error(`删除请求失败：${res.status}`);
-    return res.json();
-  })
-  .then(res=>{
-    if(res.code===0){
-      alert('删除成功！');
-      load();
-    }else if(res.code===-2){
-      alert('密码错误，删除失败');
-      logout();
-    }else{
-      alert(`删除失败：${res.msg || '订单不存在'}`);
+  
+  try {
+    const res = await fetch(`${SERVER_URL}/api/deleteOrder`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        pwd: PWD,
+        id: id
+      })
+    });
+    
+    const data = await res.json();
+    if(data.code === 0) {
+      alert('删除成功');
+      load(); // 重新加载数据
+    } else if(data.code === -2) {
+      alert('密码错误');
+    } else {
+      alert(data.msg || '删除失败');
     }
-  })
-  .catch(err=>{
+  } catch (err) {
     console.error('删除订单失败：', err);
-    alert(`删除失败：${err.message || '请检查后端接口是否正常'}`);
+    alert('删除失败，请稍后重试');
+  }
+}
+
+// 搜索订单（姓名/电话模糊匹配）
+function searchOrders() {
+  const nameKeyword = document.getElementById('searchName').value.trim().toLowerCase();
+  const phoneKeyword = document.getElementById('searchPhone').value.trim();
+  
+  if(!nameKeyword && !phoneKeyword) {
+    filteredOrderData = [...orderData];
+    renderTable();
+    return;
+  }
+  
+  // 筛选逻辑
+  filteredOrderData = orderData.filter(order => {
+    const nameMatch = nameKeyword ? (order.userName || '').toLowerCase().includes(nameKeyword) : true;
+    const phoneMatch = phoneKeyword ? (order.userPhone || '').includes(phoneKeyword) : true;
+    return nameMatch && phoneMatch;
   });
+  
+  renderTable();
+}
+
+// 重置搜索
+function resetSearch() {
+  document.getElementById('searchName').value = '';
+  document.getElementById('searchPhone').value = '';
+  filteredOrderData = [...orderData];
+  renderTable();
 }
 
 // 导出Excel
-function exportExcel(){
-  if(filteredOrderData.length === 0){
-    alert('暂无订单数据可导出');
+function exportExcel() {
+  if(filteredOrderData.length === 0) {
+    alert('暂无数据可导出');
     return;
   }
-  const header = [
-    '订单ID', '姓名', '联系电话', '支付方式', '金额(元)', '提交时间',
-    '4月11日早送', '4月11日晚接', '4月12日早送',
-    '4月12日晚接', '4月11日中午考点更换',
-    '4月12日中午考点更换', '备注'
-  ];
-  const data = [header];
   
-  filteredOrderData.forEach(item=>{
-    const classData = parseClassData(item.carList || []);
-    data.push([
-      item.orderId || item.id || '-',
-      item.userName || '-',
-      item.userPhone || '-',
-      item.payType || '-',
-      item.total || 0,
-      item.createTime || '-',
-      classData['4月11日早送'],
-      classData['4月11日晚接'],
-      classData['4月12日早送'],
-      classData['4月12日晚接'],
-      classData['4月11日中午考点更换'],
-      classData['4月12日中午考点更换'],
-      item.remark || '-'
-    ]);
+  // 构建Excel数据
+  const excelData = filteredOrderData.map(order => {
+    const classMap = parseClassData(order.carList);
+    return {
+      '订单ID': order.orderId || '-',
+      '姓名': order.userName || '-',
+      '联系电话': order.userPhone || '-',
+      '支付方式': order.payType || '-',
+      '金额(元)': order.total || 0,
+      '提交时间': order.createTime || '-',
+      '4月11日早送': classMap["4月11日早送"] || '-',
+      '4月11日晚接': classMap["4月11日晚接"] || '-',
+      '4月12日早送': classMap["4月12日早送"] || '-',
+      '4月12日晚接': classMap["4月12日晚接"] || '-',
+      '4月11日中午考点更换': classMap["4月11日中午考点更换"] || '-',
+      '4月12日中午考点更换': classMap["4月12日中午考点更换"] || '-',
+      '备注': order.remark || '-'
+    };
   });
   
-  const ws = XLSX.utils.aoa_to_sheet(data);
+  // 创建工作簿
+  const ws = XLSX.utils.json_to_sheet(excelData);
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "订单列表");
-  XLSX.writeFile(wb, `订单列表_${new Date().toLocaleDateString()}.xlsx`);
+  XLSX.utils.book_append_sheet(wb, ws, '订单数据');
+  
+  // 导出文件
+  XLSX.writeFile(wb, `自考专车订单_${new Date().toLocaleDateString()}.xlsx`);
 }
+
+// 页面加载时执行
+window.onload = function() {
+  // 初始化页面
+};
 </script>
 </body>
 </html>
