@@ -52,13 +52,42 @@
     text-align:center;
     font-size: 20px;
   }
-  /* 新增：说明文字样式 */
+  /* 新增：状态说明文字样式（带颜色图标） */
   .status-desc {
     text-align: left;
     font-size: 14px;
     color: #333;
+    margin-bottom: 8px;
+    padding-left: 5px;
+    line-height: 1.6;
+  }
+  /* 颜色图标样式 */
+  .color-tag {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    margin-right: 5px;
+    vertical-align: middle;
+  }
+  .tag-white {
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+  }
+  .tag-blue {
+    background-color: #e6f7ff;
+  }
+  .tag-red {
+    background-color: #fff2f0;
+  }
+  /* 新增：数据库修改说明文字 */
+  .db-modify-desc {
+    text-align: left;
+    font-size: 13px;
+    color: #666;
     margin-bottom: 15px;
     padding-left: 5px;
+    line-height: 1.5;
   }
   .search-tools{
     display:flex;
@@ -83,7 +112,7 @@
   }
   .tools{
     display:flex;
-    gap:10px;
+    gap:8px; /* 缩小按钮间隔，不要太远 */
     margin-bottom:15px;
     align-items:center;
     justify-content:space-between;
@@ -133,7 +162,7 @@
     padding: 5px;
     line-height: 1.4;
   }
-  /* 新增：行标色样式 */
+  /* 行标色样式 */
   .row-multiple {
     background-color: #e6f7ff; /* 蓝色：多次提交 */
   }
@@ -152,9 +181,15 @@
 
 <div class="container" id="adminBox">
   <h1>订单管理</h1>
-  <!-- 新增：状态说明文字 -->
+  <!-- 优化1：带颜色图标的状态说明 -->
   <div class="status-desc">
-    白色：只提交一次，蓝色：多次提交，红色：班次有修改
+    <span class="color-tag tag-white"></span>白色：只提交一次　
+    <span class="color-tag tag-blue"></span>蓝色：多次提交　
+    <span class="color-tag tag-red"></span>红色：班次有修改
+  </div>
+  <!-- 优化2：新增数据库修改说明文字 -->
+  <div class="db-modify-desc">
+    在数据库中手动修改某条订单的班次后，需要把该订单的 isModified 字段设为 true，这样后台页面就会标红
   </div>
   <div class="search-tools">
     <input type="text" id="searchName" placeholder="姓名查询">
@@ -163,9 +198,11 @@
     <button onclick="resetSearch()">重置</button>
   </div>
   <div class="tools">
-    <!-- 修改：导出Excel按钮移到刷新左侧 -->
-    <button onclick="exportExcel()">导出Excel</button>
-    <button onclick="load()">刷新</button>
+    <!-- 优化3：导出Excel按钮在刷新右侧，间隔8px（不远） -->
+    <div style="display: flex; gap: 8px;">
+      <button onclick="load()">刷新</button>
+      <button onclick="exportExcel()">导出Excel</button>
+    </div>
     <button class="exit-btn" onclick="logout()">退出</button>
   </div>
   <div class="table-container">
@@ -248,7 +285,7 @@ async function load() {
   }
 }
 
-// 渲染订单表格（新增行标色 + 固定班次排序）
+// 渲染订单表格
 function renderTable() {
   const list = document.getElementById('list');
   list.innerHTML = '';
@@ -261,13 +298,12 @@ function renderTable() {
   filteredOrderData.forEach(order => {
     const tr = document.createElement('tr');
     
-    // 核心：行标色逻辑
+    // 行标色逻辑
     if(order.isModified) {
       tr.className = 'row-modified'; // 红色：手动修改
     } else if(order.submitCount && order.submitCount > 1) {
       tr.className = 'row-multiple'; // 蓝色：多次提交
     }
-    // 白色：默认（只提交一次）
     
     // 封装获取班次信息的函数（按固定顺序）
     const getClassInfo = (name) => {
@@ -278,12 +314,12 @@ function renderTable() {
       return '-';
     };
 
-    // 格式化支付记录（每一笔分行显示）
+    // 格式化支付记录
     const formatPaymentRecords = () => {
       if(!order.paymentRecords || order.paymentRecords.length === 0) return '-';
       return order.paymentRecords.map((record, index) => {
         return `第${index+1}笔：${record.payType} ${record.amount}元 ${record.time}`;
-      }).join('\n'); // 用换行符分隔，配合CSS的pre-line显示
+      }).join('\n');
     };
     
     tr.innerHTML = `
@@ -294,7 +330,6 @@ function renderTable() {
       <td class="pay-record">${formatPaymentRecords()}</td>
       <td>${order.total || 0}</td>
       <td>${order.createTime || '-'}</td>
-      <!-- 按固定顺序展示班次列 -->
       <td>${getClassInfo('4月11日早送')}</td>
       <td>${getClassInfo('4月11日晚接')}</td>
       <td>${getClassInfo('4月12日早送')}</td>
@@ -318,7 +353,7 @@ async function deleteOrder(id) {
     });
     const data = await res.json();
     alert(data.msg);
-    load(); // 删除后刷新列表
+    load();
   } catch (err) {
     alert('删除失败：' + err.message);
   }
@@ -344,7 +379,7 @@ function resetSearch() {
   renderTable();
 }
 
-// 导出Excel（包含支付记录 + 固定班次排序）
+// 导出Excel
 function exportExcel() {
   if(filteredOrderData.length === 0) { 
     alert('暂无数据可导出'); 
@@ -352,7 +387,6 @@ function exportExcel() {
   }
   
   const excelData = filteredOrderData.map(o => {
-    // 按固定顺序获取班次信息
     const getInfo = (n) => {
       const i = o.carList.find(x=>x.name===n);
       if(!i) return '-';
@@ -361,7 +395,6 @@ function exportExcel() {
       return '-';
     };
 
-    // 格式化支付记录为Excel可显示的文本
     const getPaymentRecords = () => {
       if(!o.paymentRecords || o.paymentRecords.length === 0) return '-';
       return o.paymentRecords.map((r, i) => `第${i+1}笔：${r.payType} ${r.amount}元 ${r.time}`).join('；');
