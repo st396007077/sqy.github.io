@@ -779,7 +779,7 @@ function closeEditModal() {
   document.getElementById('classItemsContainer').innerHTML = '';
 }
 
-// 保存修改的订单
+// 保存修改的订单（修复后）
 function saveEditOrder() {
   const orderId = document.getElementById('editOrderId').value;
   const name = document.getElementById('editName').value.trim();
@@ -805,7 +805,7 @@ function saveEditOrder() {
     return;
   }
 
-  // 收集班次数据
+  // 收集班次数据（修复核心：增加空值判断）
   const classItems = document.querySelectorAll('#classItemsContainer .class-item');
   if(classItems.length === 0) {
     alert('请至少选择一个乘坐班次');
@@ -814,21 +814,34 @@ function saveEditOrder() {
 
   const carList = [];
   classItems.forEach(item => {
-    const classType = item.querySelector('select:first-child').value;
+    // 第一步：获取班次类型下拉框（必选，先判断是否存在）
+    const classSelect = item.querySelector('select:first-child');
+    if (!classSelect) return; // 无班次下拉框则跳过
+    const classType = classSelect.value;
     const isDoubleSelect = item.classList.contains('double-select');
     
     if(!isDoubleSelect) {
-      // 普通班次：单学校
-      const school = item.querySelector('select:nth-child(2)').value;
+      // 普通班次：单学校（增加空值判断）
+      const schoolSelect = item.querySelector('select:nth-child(2)');
+      if (!schoolSelect) return; // 无学校下拉框则跳过
+      const school = schoolSelect.value;
       carList.push({
         name: classType,
         school: school,
         price: classType.includes('考点更换') ? 3 : 20 // 匹配前端价格
       });
     } else {
-      // 考点更换：双学校
-      const fromSchool = item.querySelector('.select-group:first-child select').value;
-      const toSchool = item.querySelector('.select-group:last-child select').value;
+      // 考点更换：双学校（增加空值判断）
+      const fromGroup = item.querySelector('.select-group:first-child');
+      const toGroup = item.querySelector('.select-group:last-child');
+      if (!fromGroup || !toGroup) return; // 无分组则跳过
+      
+      const fromSelect = fromGroup.querySelector('select');
+      const toSelect = toGroup.querySelector('select');
+      if (!fromSelect || !toSelect) return; // 无下拉框则跳过
+      
+      const fromSchool = fromSelect.value;
+      const toSchool = toSelect.value;
       carList.push({
         name: classType,
         from: fromSchool,
@@ -837,6 +850,12 @@ function saveEditOrder() {
       });
     }
   });
+
+  // 二次校验：确保收集到有效班次
+  if (carList.length === 0) {
+    alert('请选择有效的乘坐班次信息');
+    return;
+  }
 
   // 计算总金额
   const total = carList.reduce((sum, item) => sum + Number(item.price), 0);
@@ -853,7 +872,7 @@ function saveEditOrder() {
     rowClass: "row-modified" // 行样式改为蓝色
   };
 
-  // 提交修改
+  // 提交修改（后续代码不变）
   fetch(`${SERVER_URL}/api/updateOrder`, {
     method: 'POST',
     headers: {
@@ -869,8 +888,7 @@ function saveEditOrder() {
     if(res.code===0){
       alert('修改成功！');
       closeEditModal();
-      // 重新加载数据（自动应用蓝色样式和“已修改”备注）
-      load();
+      load(); // 重新加载数据
     }else if(res.code===-2){
       alert('密码错误，修改失败');
       logout();
