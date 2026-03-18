@@ -86,7 +86,7 @@
   }
   table{
     width: 100%;
-    min-width: 900px; /* ✅ 降低最小宽度，适配更窄屏幕 */
+    min-width: 1100px; /* ✅ 调整最小宽度，适配新增列 */
     border-collapse: collapse;
   }
   th,td{
@@ -106,6 +106,8 @@
   .id-col{width: 80px !important;}
   .time-col{width: 150px !important;}
   .name-col{width: 80px !important;}
+  .phone-col{width: 110px !important;} /* ✅ 新增：联系电话列宽 */
+  .paytype-col{width: 100px !important;} /* ✅ 新增：支付方式列宽 */
   .money-col{width: 80px !important;}
   .oper-col{width: 80px !important;}
   .class-col{width: 120px !important;}
@@ -158,6 +160,8 @@
         <tr>
           <th class="id-col">订单ID</th>
           <th class="name-col">姓名</th>
+          <th class="phone-col">联系电话</th> <!-- ✅ 新增：联系电话列 -->
+          <th class="paytype-col">支付方式</th> <!-- ✅ 新增：支付方式列 -->
           <th class="money-col">金额(元)</th>
           <th class="time-col">提交时间</th>
           <th class="class-col">4月11日早送</th>
@@ -247,6 +251,8 @@ function load(){
           <tr data-order-id="${item.id}">
             <td class="id-col">${item.orderId || item.id || '-'}</td>
             <td class="name-col">${item.userName || '-'}</td>
+            <td class="phone-col">${item.userPhone || '-'}</td> <!-- ✅ 新增：显示联系电话 -->
+            <td class="paytype-col">${item.payType || '-'}</td> <!-- ✅ 新增：显示支付方式 -->
             <td class="money-col">${item.total || 0}</td>
             <td class="time-col">${item.createTime || '-'}</td>
             <td class="class-col ${classData['4月11日早送'] === '-' ? 'empty-cell' : ''}">${classData['4月11日早送']}</td>
@@ -259,7 +265,8 @@ function load(){
           </tr>
         `;
       });
-      document.getElementById('list').innerHTML = html || '<tr><td colspan="11" style="text-align:center;color:#999">暂无订单数据</td></tr>';
+      // ✅ 调整 colspan 为 13（新增2列后总列数）
+      document.getElementById('list').innerHTML = html || '<tr><td colspan="13" style="text-align:center;color:#999">暂无订单数据</td></tr>';
     }else if(res.code===-2){
       alert('密码错误，请重新登录');
       logout();
@@ -309,17 +316,17 @@ function deleteOrder(orderId){
   });
 }
 
-// 导出Excel
+// 导出Excel（✅ 移除「操作」列）
 function exportExcel(){
   if(orderData.length === 0){
     alert('暂无订单数据可导出');
     return;
   }
   const header = [
-    '订单ID', '姓名', '金额(元)', '提交时间',
+    '订单ID', '姓名', '联系电话', '支付方式', '金额(元)', '提交时间',
     '4月11日早送', '4月11日晚接', '4月12日早送',
     '4月12日晚接', '4月11日中午考点更换',
-    '4月12日中午考点更换', '操作'
+    '4月12日中午考点更换' // ✅ 移除「操作」表头
   ];
   const data = [header];
   
@@ -328,6 +335,8 @@ function exportExcel(){
     data.push([
       item.orderId || item.id || '-',
       item.userName || '-',
+      item.userPhone || '-',
+      item.payType || '-',
       item.total || 0,
       item.createTime || '-',
       classData['4月11日早送'],
@@ -335,8 +344,7 @@ function exportExcel(){
       classData['4月12日早送'],
       classData['4月12日晚接'],
       classData['4月11日中午考点更换'],
-      classData['4月12日中午考点更换'],
-      '已删除/正常'
+      classData['4月12日中午考点更换'] // ✅ 移除「操作」列数据
     ]);
   });
   
