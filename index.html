@@ -2,292 +2,1036 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>乘车订单提交</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+<title>自考本科考试专车自助订阅</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:Arial;background:#f6f8fa;padding:15px;line-height:1.5}
-.container{max-width:700px;margin:0 auto;background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px10px #0000000b}
-h2{text-align:center;margin-bottom:20px;font-size:20px}
-.section{margin-bottom:18px}
-label{display:block;margin-bottom:6px;font-weight:bold}
-input{width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:14px}
-.vehicle-item{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:10px;border-radius:8px;border:1px solid #eee}
-.school-select{margin-top:6px;display:flex;gap:8px}
-select{padding:8px;border-radius:6px;border:1px solid #ddd}
-.pay-type{display:flex;gap:12px;margin:10px 0}
-.pay-btn{padding:10px 14px;border:1px solid #007bff;border-radius:8px;background:none;cursor:pointer}
-.pay-btn.active{background:#007bff;color:#fff}
-.upload-box{border:2px dashed #ccc;border-radius:8px;padding:25px;text-align:center;cursor:pointer;margin:10px 0}
-#screenshotPreview{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-.screenshot-img{width:80px;height:80px;object-fit:cover;border-radius:6px}
-.total-price{font-size:18px;font-weight:bold;color:#dc3545;margin:15px 0}
-.submit-btn{width:100%;padding:14px;background:#007bff;color:white;border:none;border-radius:8px;font-size:16px;font-weight:bold}
-.modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:none;justify-content:center;align-items:center;padding:15px;z-index:9999}
-.modal-content{background:#fff;border-radius:12px;padding:25px;max-width:550px;width:100%;max-height:90vh;overflow-y:auto}
-.modal-content img{max-width:100%;border-radius:8px;margin:10px 0}
-.modal-btns{display:flex;justify-content:flex-end;gap:10px;margin-top:15px}
-.modal-btns button{padding:10px 16px;border-radius:8px;border:none}
-.btn-cancel{background:#ccc}
-.btn-confirm{background:#007bff;color:#fff}
-#successInfo{line-height:1.8;margin:10px 0}
+* {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+font-family: "Microsoft YaHei", sans-serif;
+}
+
+html, body {
+height: 100%;
+background-color: #f5f7fa;
+padding: 10px;
+margin: 0;
+overflow-x: hidden;
+}
+
+.query-btn {
+position: fixed;
+top: 10px;
+right: 10px;
+padding: 6px 10px;
+background: #28a745;
+color: white;
+border: none;
+border-radius: 6px;
+cursor: pointer;
+font-size: 13px;
+z-index: 9999;
+white-space: nowrap;
+}
+.query-btn:hover {
+background: #218838;
+}
+
+.container {
+background: white;
+padding: 20px 15px;
+border-radius: 12px;
+box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+max-width: 800px;
+margin: 0 auto 20px;
+width: 100%;
+}
+
+.title {
+text-align: center;
+color: #2c3e50;
+margin-bottom: 15px;
+font-size: clamp(18px, 5vw, 24px);
+}
+
+.desc {
+background: #f8f9fa;
+padding: 12px;
+border-radius: 8px;
+margin-bottom: 20px;
+line-height: 1.6;
+color: #34495e;
+font-size: 14px;
+}
+
+.form-item {
+margin-bottom: 16px;
+}
+
+.form-item label {
+display: block;
+margin-bottom: 6px;
+font-weight: bold;
+color: #2c3e50;
+font-size: 15px;
+}
+
+input, select {
+width: 100%;
+padding: 10px 12px;
+border: 1px solid #ddd;
+border-radius: 6px;
+font-size: 16px;
+min-height: 44px;
+}
+
+.error-tip {
+color: red;
+font-size: 13px;
+margin-top: 4px;
+display: none;
+}
+
+.car-item {
+border: 1px solid #eee;
+padding: 12px;
+border-radius: 8px;
+margin-bottom: 10px;
+}
+
+.car-item-header {
+display: flex;
+align-items: center;
+gap: 8px;
+margin-bottom: 8px;
+}
+
+.car-item-header input {
+width: auto;
+flex-shrink: 0;
+}
+
+.school-select {
+margin-top: 8px;
+display: none;
+}
+
+.total-price {
+font-size: clamp(16px, 4vw, 20px);
+font-weight: bold;
+color: #e74c3c;
+margin: 20px 0;
+padding: 10px;
+background: #fff5f5;
+border-radius: 6px;
+}
+
+.pay-btn {
+width: 100%;
+padding: 14px;
+background: #007bff;
+color: white;
+border: none;
+border-radius: 8px;
+font-size: 16px;
+cursor: pointer;
+}
+
+.pay-btn:hover {
+background: #0056b3;
+}
+
+.modal {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: rgba(0,0,0,0.5);
+display: none;
+justify-content: center;
+align-items: center;
+z-index: 999;
+padding: 15px;
+}
+
+.modal-content {
+background: white;
+padding: 20px 15px;
+border-radius: 10px;
+width: 100%;
+max-width: 500px;
+max-height: 90vh;
+overflow-y: auto;
+text-align: center;
+position: relative;
+}
+
+.modal-close-btn {
+position: absolute;
+right: 15px;
+top: 10px;
+font-size: 26px;
+color: red;
+cursor: pointer;
+font-weight: bold;
+line-height: 1;
+z-index: 10;
+}
+
+.modal-btns {
+display: flex;
+gap: 12px;
+margin-top: 18px;
+flex-wrap: nowrap !important;
+}
+
+.modal-btns button {
+flex: 1;
+padding: 10px;
+border: none;
+border-radius: 6px;
+cursor: pointer;
+font-size: 15px;
+white-space: nowrap;
+min-width: 100px;
+}
+
+.wechat-btn {
+background: #07c160;
+color: white;
+}
+
+.alipay-btn {
+background: #1677ff;
+color: white;
+}
+
+.qrcode-img {
+max-width: 280px;
+width: 100%;
+height: auto;
+margin: 15px auto;
+display: block;
+object-fit: contain;
+}
+
+.success-info {
+text-align: left;
+margin: 15px 0;
+line-height: 1.8;
+font-size: 15px;
+}
+
+.close-btn {
+margin-top: 18px;
+padding: 10px 24px;
+background: #007bff;
+color: white;
+border: none;
+border-radius: 6px;
+cursor: pointer;
+white-space: nowrap;
+}
+
+.query-input {
+margin: 15px 0;
+}
+.query-input-item {
+margin-bottom: 12px;
+}
+.query-result {
+text-align: left;
+line-height: 1.8;
+margin: 12px 0;
+max-height: 280px;
+overflow-y: auto;
+font-size: 14px;
+}
+
+.pay-tip {
+margin-top: 12px;
+font-size: 16px;
+line-height: 1.6;
+}
+.red-bg-tip {
+background-color: #ff4444;
+color: white;
+padding: 12px;
+border-radius: 6px;
+font-weight: bold;
+font-size: 16px;
+margin: 12px 0;
+}
+.upload-btn-row {
+margin: 12px 0;
+}
+.upload-btn {
+width: 100%;
+padding: 12px;
+background: #1677ff;
+color: white;
+border: none;
+border-radius: 6px;
+font-size: 15px;
+cursor: pointer;
+white-space: nowrap;
+}
+.confirm-submit-btn {
+background: #28a745;
+}
+.back-btn {
+background: #6c757d;
+}
+#screenshotInput {
+display: none;
+}
+
+.preview-container {
+margin: 15px 0;
+display: flex;
+flex-wrap: wrap;
+gap: 10px;
+justify-content: center;
+}
+.preview-img-wrapper {
+position: relative;
+width: 100px;
+height: 100px;
+}
+.preview-img {
+width: 100px;
+height: 100px;
+object-fit: cover;
+border-radius: 6px;
+border: 1px solid #ddd;
+cursor: zoom-in;
+}
+.del-img-btn {
+position: absolute;
+top: -6px;
+right: -6px;
+width: 20px;
+height: 20px;
+background: red;
+color: white;
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 12px;
+cursor: pointer;
+border: 2px solid white;
+}
+
+.img-zoom-modal {
+position: fixed;
+top: 0; left: 0;
+width: 100%; height: 100%;
+background: rgba(0,0,0,0.9);
+display: none;
+align-items: center;
+justify-content: center;
+z-index: 99999;
+padding: 20px;
+}
+.img-zoom-modal img {
+max-width: 100%;
+max-height: 100%;
+object-fit: contain;
+}
+
+/* 自定义alert弹窗样式 */
+.custom-alert {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: rgba(0,0,0,0.5);
+display: flex;
+justify-content: center;
+align-items: center;
+z-index: 999999;
+padding: 20px;
+}
+.alert-content {
+background: white;
+padding: 25px 20px;
+border-radius: 12px;
+width: 100%;
+max-width: 320px;
+text-align: center;
+}
+.alert-text {
+font-size: 16px;
+margin-bottom: 20px;
+color: #333;
+line-height: 1.6;
+}
+.alert-btn {
+padding: 10px 30px;
+background: #007bff;
+color: white;
+border: none;
+border-radius: 6px;
+cursor: pointer;
+font-size: 15px;
+}
 </style>
 </head>
 <body>
+
+<button class="query-btn" onclick="openQueryModal()">交费信息查询</button>
+
 <div class="container">
-  <h2>订单提交</h2>
-
-  <div class="section">
-    <label>姓名</label>
-    <input type="text" id="userName" placeholder="请输入姓名">
-  </div>
-  <div class="section">
-    <label>电话</label>
-    <input type="text" id="userPhone" placeholder="请输入手机号">
-  </div>
-
-  <div class="section">
-    <label>选择班次</label>
-    <div class="vehicle-item">
-      <input type="checkbox" class="car-check" data-type="1" data-name="4月11日早送" value="20">
-      <span>4月11日早送 20元</span>
-      <div class="school-select" id="school1">
-        <select><option value="学校A">学校A</option><option value="学校B">学校B</option></select>
-      </div>
-    </div>
-    <div class="vehicle-item">
-      <input type="checkbox" class="car-check" data-type="2" data-name="4月11日晚接" value="20">
-      <span>4月11日晚接 20元</span>
-      <div class="school-select" id="school2">
-        <select><option value="学校A">学校A</option><option value="学校B">学校B</option></select>
-      </div>
-    </div>
-    <div class="vehicle-item">
-      <input type="checkbox" class="car-check" data-type="3" data-name="4月12日早送" value="20">
-      <span>4月12日早送 20元</span>
-      <div class="school-select" id="school3">
-        <select><option value="学校A">学校A</option><option value="学校B">学校B</option></select>
-      </div>
-    </div>
-    <div class="vehicle-item">
-      <input type="checkbox" class="car-check" data-type="4" data-name="4月12日晚接" value="20">
-      <span>4月12日晚接 20元</span>
-      <div class="school-select" id="school4">
-        <select><option value="学校A">学校A</option><option value="学校B">学校B</option></select>
-      </div>
-    </div>
-  </div>
-
-  <div class="section">
-    <label>支付方式</label>
-    <div class="pay-type">
-      <button class="pay-btn" data-type="微信">微信支付</button>
-      <button class="pay-btn" data-type="支付宝">支付宝</button>
-    </div>
-  </div>
-
-  <div class="section">
-    <label>上传支付截图</label>
-    <div class="upload-box" onclick="document.getElementById('screenshotInput').click()">
-      点击上传截图（支持png/jpg/webp）
-    </div>
-    <input type="file" id="screenshotInput" multiple accept="image/*" style="display:none">
-    <div id="screenshotPreview"></div>
-  </div>
-
-  <div class="total-price">合计：<span id="totalPrice">0</span> 元</div>
-  <button class="submit-btn" onclick="showScreenshotModal()">确认提交</button>
+<h1 class="title">自考本科考试专车自助订阅</h1>
+<div class="desc">
+<strong>交费操作说明：</strong><br>
+1. 请准确填写个人姓名和联系电话，用于乘车核验；<br>
+2. 勾选需要乘坐的车次（可多选），系统自动计算总费用；<br>
+3. 确认费用后点击支付，选择支付方式完成交费；<br>
+4. 支付完成后需要返回页面点击“已完成支付”，才能提交乘坐信息；<br>
+5. 已提交的班次无法再次选择，如需修改请联系群主。
 </div>
 
-<!-- 截图确认弹窗 -->
+<div class="form-item">
+<label>乘车人姓名 <span style="color:red">*</span></label>
+<input type="text" id="userName" placeholder="请输入2-5个汉字的真实姓名" oninput="checkNameInput();loadUserHistory()">
+<div class="error-tip" id="nameError">请输入2-5个有效的汉字姓名</div>
+</div>
+
+<div class="form-item">
+<label>联系电话 <span style="color:red">*</span></label>
+<input type="tel" id="userPhone" placeholder="请输入您的手机号码" maxlength="11" oninput="checkPhoneInput();loadUserHistory()">
+<div class="error-tip" id="phoneError">请输入有效的11位手机号码</div>
+</div>
+
+<div class="form-item">
+<label>乘坐车次选择（可多选）</label>
+
+<div class="car-item">
+<div class="car-item-header">
+<input type="checkbox" class="car-check" value="20" data-type="1" data-name="4月11日早送">
+<span>4月11日早送（20元）</span>
+</div>
+<div class="school-select" id="school1">
+<select class="school-select-input" data-type="1">
+<option value="">请选择到达学校</option>
+<option>绣水中学</option>
+<option>实验小学</option>
+<option>实验中学</option>
+<option>第二实验中学</option>
+<option>鲁能实验小学</option>
+<option>中等职业学校</option>
+</select>
+<div class="error-tip" id="error1">请选择学校</div>
+</div>
+</div>
+
+<div class="car-item">
+<div class="car-item-header">
+<input type="checkbox" class="car-check" value="20" data-type="2" data-name="4月11日晚接">
+<span>4月11日晚接（20元）</span>
+</div>
+<div class="school-select" id="school2">
+<select class="school-select-input" data-type="2">
+<option value="">请选择出发学校</option>
+<option>绣水中学</option>
+<option>实验小学</option>
+<option>实验中学</option>
+<option>第二实验中学</option>
+<option>鲁能实验小学</option>
+<option>中等职业学校</option>
+</select>
+<div class="error-tip" id="error2">请选择学校</div>
+</div>
+</div>
+
+<div class="car-item">
+<div class="car-item-header">
+<input type="checkbox" class="car-check" value="20" data-type="3" data-name="4月12日早送">
+<span>4月12日早送（20元）</span>
+</div>
+<div class="school-select" id="school3">
+<select class="school-select-input" data-type="3">
+<option value="">请选择到达学校</option>
+<option>绣水中学</option>
+<option>实验小学</option>
+<option>实验中学</option>
+<option>第二实验中学</option>
+<option>鲁能实验小学</option>
+<option>中等职业学校</option>
+</select>
+<div class="error-tip" id="error3">请选择学校</div>
+</div>
+</div>
+
+<div class="car-item">
+<div class="car-item-header">
+<input type="checkbox" class="car-check" value="20" data-type="4" data-name="4月12日晚接">
+<span>4月12日晚接（20元）</span>
+</div>
+<div class="school-select" id="school4">
+<select class="school-select-input" data-type="4">
+<option value="">请选择出发学校</option>
+<option>绣水中学</option>
+<option>实验小学</option>
+<option>实验中学</option>
+<option>第二实验中学</option>
+<option>鲁能实验小学</option>
+<option>中等职业学校</option>
+</select>
+<div class="error-tip" id="error4">请选择学校</div>
+</div>
+</div>
+
+<div class="car-item">
+<div class="car-item-header">
+<input type="checkbox" class="car-check" value="3" data-type="5" data-name="4月11日中午考点更换">
+<span>4月11日中午考点更换（3元）</span>
+</div>
+<div class="school-select" id="school5">
+<select class="school-select-input" data-type="5" style="margin-bottom:8px">
+<option value="">请选择出发学校</option>
+<option>绣水中学</option>
+<option>实验小学</option>
+<option>实验中学</option>
+<option>第二实验中学</option>
+<option>鲁能实验小学</option>
+<option>中等职业学校</option>
+</select>
+<select class="school-select-input" data-type="5">
+<option value="">请选择送达学校</option>
+<option>绣水中学</option>
+<option>实验小学</option>
+<option>实验中学</option>
+<option>第二实验中学</option>
+<option>鲁能实验小学</option>
+<option>中等职业学校</option>
+</select>
+<div class="error-tip" id="error5">请选择完整学校信息</div>
+</div>
+</div>
+
+<div class="car-item">
+<div class="car-item-header">
+<input type="checkbox" class="car-check" value="3" data-type="6" data-name="4月12日中午考点更换">
+<span>4月12日中午考点更换（3元）</span>
+</div>
+<div class="school-select" id="school6">
+<select class="school-select-input" data-type="6" style="margin-bottom:8px">
+<option value="">请选择出发学校</option>
+<option>绣水中学</option>
+<option>实验小学</option>
+<option>实验中学</option>
+<option>第二实验中学</option>
+<option>鲁能实验小学</option>
+<option>中等职业学校</option>
+</select>
+<select class="school-select-input" data-type="6">
+<option value="">请选择送达学校</option>
+<option>绣水中学</option>
+<option>实验小学</option>
+<option>实验中学</option>
+<option>第二实验中学</option>
+<option>鲁能实验小学</option>
+<option>中等职业学校</option>
+</select>
+<div class="error-tip" id="error6">请选择完整学校信息</div>
+</div>
+</div>
+</div>
+
+<div class="total-price">
+费用总计：<span id="totalPrice">0</span> 元
+</div>
+
+<button class="pay-btn" onclick="openPayModal()">确认并支付费用</button>
+</div>
+
+<!-- 支付方式弹窗 -->
+<div class="modal" id="payModal">
+<div class="modal-content">
+<div class="modal-close-btn" onclick="closePayModal()">&times;</div>
+<h3>请选择支付方式</h3>
+<p style="color:red; font-weight:bold; margin:10px 0;">【优先推荐使用支付宝支付，微信可能出现无法支付问题】</p>
+<div class="modal-btns">
+<button class="alipay-btn" onclick="showQR('alipay')">支付宝</button>
+<button class="wechat-btn" onclick="showQR('wechat')">微信</button>
+</div>
+</div>
+</div>
+
+<!-- 二维码弹窗 -->
+<div class="modal" id="qrModal">
+<div class="modal-content">
+<h3 id="qrTitle">微信收款码</h3>
+<img class="qrcode-img" id="qrImg" src="">
+<p class="pay-tip" id="payTip">请保存二维码到微信扫码完成支付</p>
+<div class="red-bg-tip">【支付完成后需要返回页面点击“已完成支付”，提交支付截图才能提交乘坐信息！！！】</div>
+
+<div class="modal-btns" style="margin-top:20px">
+<button class="close-btn" style="background:#6c757d" onclick="closeQRModal()">关闭</button>
+<button class="close-btn" onclick="openScreenshotModal()">已完成支付</button>
+</div>
+</div>
+</div>
+
+<!-- 支付截图上传弹窗 -->
 <div class="modal" id="screenshotModal">
-  <div class="modal-content">
-    <h3>确认提交订单？</h3>
-    <div id="previewList"></div>
-    <div class="modal-btns">
-      <button class="btn-cancel" onclick="closeScreenshotModal()">取消</button>
-      <button class="btn-confirm" onclick="submitOrderSecure()">确认提交</button>
-    </div>
-  </div>
+<div class="modal-content">
+<h3>提交支付截图</h3>
+<p style="margin:15px 0;">请上传支付成功的截图凭证</p>
+
+<div class="preview-container" id="previewContainer"></div>
+
+<input type="file" id="screenshotInput" accept="image/*" multiple onchange="previewScreenshot()">
+
+<div class="upload-btn-row">
+<button class="upload-btn" onclick="document.getElementById('screenshotInput').click()">上传截图</button>
+</div>
+
+<div class="modal-btns">
+<button class="back-btn" onclick="backToQRModal()">返回</button>
+<button class="confirm-submit-btn" onclick="submitOrderSecure()">确认提交</button>
+</div>
+</div>
+</div>
+
+<!-- 图片放大弹窗 -->
+<div class="img-zoom-modal" id="imgZoomModal" onclick="closeImgZoom()">
+<img id="imgZoomContent" src="">
 </div>
 
 <!-- 成功弹窗 -->
 <div class="modal" id="successModal">
-  <div class="modal-content">
-    <h3>提交成功</h3>
-    <div id="successInfo"></div>
-    <div class="modal-btns">
-      <button class="btn-confirm" onclick="location.reload()">完成</button>
-    </div>
-  </div>
+<div class="modal-content">
+<h3>支付完成！</h3>
+<div class="success-info" id="successInfo"></div>
+<button class="close-btn" onclick="closeSuccessModal()">确定</button>
+</div>
+</div>
+
+<!-- 查询弹窗 -->
+<div class="modal" id="queryModal">
+<div class="modal-content">
+<h3>交费信息查询</h3>
+<div class="query-input">
+<div class="query-input-item">
+<input type="text" id="queryName" placeholder="请输入乘车人姓名">
+</div>
+<div class="query-input-item">
+<input type="tel" id="queryPhone" placeholder="请输入联系电话" maxlength="11">
+</div>
+</div>
+<button class="close-btn" onclick="searchPayInfo()">立即查询</button>
+<div class="query-result" id="queryResult"></div>
+<button class="close-btn" onclick="closeQueryModal()">关闭</button>
+</div>
 </div>
 
 <script>
 const SERVER_URL = "https://zikaocar-server.onrender.com";
+let selectedPayType = '';
+let existedCarNames = [];
+let hasUploadedScreenshot = false;
 let screenshotFiles = [];
-let selectedPayType = "";
 let isSubmitting = false; // 防重复提交锁
 
-// 支付方式选择
-document.querySelectorAll('.pay-btn').forEach(b => {
-  b.onclick = () => {
-    document.querySelectorAll('.pay-btn').forEach(x => x.classList.remove('active'));
-    b.classList.add('active');
-    selectedPayType = b.dataset.type;
-  }
-});
+const FIXED_CAR_ORDER = [
+'4月11日早送','4月11日晚接','4月12日早送','4月12日晚接',
+'4月11日中午考点更换','4月12日中午考点更换'
+];
 
-// 截图预览
-document.getElementById('screenshotInput').onchange = function(e) {
-  const files = Array.from(e.target.files);
-  screenshotFiles = [];
-  document.getElementById('screenshotPreview').innerHTML = '';
+// 关闭支付方式弹窗
+function closePayModal() {
+document.getElementById('payModal').style.display = 'none';
+}
 
-  for (const f of files) {
-    // 安全校验：只允许图片
+// 自定义弹窗函数
+function showAlert(message) {
+const oldAlert = document.querySelector('.custom-alert');
+if(oldAlert) oldAlert.remove();
+
+const alertDiv = document.createElement('div');
+alertDiv.className = 'custom-alert';
+alertDiv.innerHTML = `
+           <div class="alert-content">
+               <div class="alert-text">${message}</div>
+               <button class="alert-btn" onclick="this.closest('.custom-alert').remove()">确定</button>
+           </div>
+       `;
+document.body.appendChild(alertDiv);
+}
+
+// 实时校验姓名输入
+function checkNameInput() {
+const name = document.getElementById('userName').value.trim();
+const nameError = document.getElementById('nameError');
+if(validateName(name)) {
+nameError.style.display = 'none';
+}
+}
+
+// 实时校验手机号输入
+function checkPhoneInput() {
+const phone = document.getElementById('userPhone').value.trim();
+const phoneError = document.getElementById('phoneError');
+if(validatePhone(phone)) {
+phoneError.style.display = 'none';
+}
+}
+
+// 图片预览
+function previewScreenshot() {
+const fileInput = document.getElementById('screenshotInput');
+const newFiles = Array.from(fileInput.files);
+
+for (let f of newFiles) {
     if (!f.type.startsWith('image/')) {
-      alert('仅支持图片文件');
-      continue;
+        showAlert('仅支持上传图片文件！');
+        return;
     }
-    // 限制10M
     if (f.size > 10 * 1024 * 1024) {
-      alert('文件不能超过10M');
-      continue;
+        showAlert('图片大小不能超过10MB！');
+        return;
     }
-    screenshotFiles.push(f);
-    const img = document.createElement('img');
-    img.className = 'screenshot-img';
-    img.src = URL.createObjectURL(f);
-    document.getElementById('screenshotPreview').appendChild(img);
-  }
-};
-
-// 计算价格
-function calcTotal() {
-  return Array.from(document.querySelectorAll('.car-check:checked'))
-    .reduce((s, i) => s + Number(i.value), 0);
 }
 
-document.querySelectorAll('.car-check').forEach(c => {
-  c.onchange = () => document.getElementById('totalPrice').textContent = calcTotal();
+if (newFiles.length > 0) {
+screenshotFiles = [...screenshotFiles, ...newFiles];
+hasUploadedScreenshot = true;
+}
+
+renderAllPreviews();
+fileInput.value = '';
+}
+
+// 渲染所有预览图
+function renderAllPreviews() {
+const previewContainer = document.getElementById('previewContainer');
+previewContainer.innerHTML = '';
+
+screenshotFiles.forEach((file, index) => {
+const reader = new FileReader();
+reader.onload = function (e) {
+const wrapper = document.createElement('div');
+wrapper.className = 'preview-img-wrapper';
+
+const img = document.createElement('img');
+img.src = e.target.result;
+img.className = 'preview-img';
+img.onclick = () => openImgZoom(e.target.result);
+
+const delBtn = document.createElement('div');
+delBtn.className = 'del-img-btn';
+delBtn.innerText = '×';
+delBtn.onclick = () => deleteScreenshot(index);
+
+wrapper.appendChild(img);
+wrapper.appendChild(delBtn);
+previewContainer.appendChild(wrapper);
+};
+reader.readAsDataURL(file);
+});
+}
+
+// 删除图片
+function deleteScreenshot(index) {
+if (!confirm('确定要删除这张图片吗？')) return;
+screenshotFiles.splice(index, 1);
+hasUploadedScreenshot = screenshotFiles.length > 0;
+renderAllPreviews();
+}
+
+// 放大图片
+function openImgZoom(src) {
+document.getElementById('imgZoomContent').src = src;
+document.getElementById('imgZoomModal').style.display = 'flex';
+}
+function closeImgZoom() {
+document.getElementById('imgZoomModal').style.display = 'none';
+}
+
+// 加载历史
+async function loadUserHistory() {
+const name = document.getElementById('userName').value.trim();
+const phone = document.getElementById('userPhone').value.trim();
+if(!name || !phone || name.length<2 || phone.length<11) return;
+try {
+const res = await fetch(`${SERVER_URL}/api/queryOrder?userName=${encodeURIComponent(name)}`);
+const data = await res.json();
+existedCarNames = [];
+if(data.code ===0 && data.data.length>0) {
+const u = data.data.find(item=>item.userPhone === phone);
+if(u) existedCarNames = u.carList.map(i=>i.name);
+}
+document.querySelectorAll('.car-check').forEach(box => {
+const n = box.dataset.name;
+if(existedCarNames.includes(n)) { box.disabled=true; box.checked=false; }
+else box.disabled=false;
+});
+calcTotal();
+} catch(e){}
+}
+
+// 勾选
+document.querySelectorAll('.car-check').forEach(i => {
+i.addEventListener('change', function(){
+const n = this.dataset.name;
+if(existedCarNames.includes(n)) { this.checked=false; showAlert('该班次已提交过，无法重复选择'); return; }
+const t = this.dataset.type;
+document.getElementById(`school${t}`).style.display = this.checked ? 'block' : 'none';
+document.getElementById(`error${t}`).style.display = 'none';
+calcTotal();
+});
 });
 
-// 打开确认弹窗
-function showScreenshotModal() {
-  const name = document.getElementById('userName').value.trim();
-  const phone = document.getElementById('userPhone').value.trim();
-  if (!name || !phone) return alert('请填写姓名和电话');
-  if (!selectedPayType) return alert('请选择支付方式');
-  if (screenshotFiles.length === 0) return alert('请上传截图');
-  if (calcTotal() <= 0) return alert('请选择班次');
+document.querySelectorAll('.school-select-input').forEach(i => {
+i.addEventListener('change', function(){
+const t = this.dataset.type;
+document.getElementById(`error${t}`).style.display = 'none';
+});
+});
 
-  const previewList = document.getElementById('previewList');
-  previewList.innerHTML = '';
-  screenshotFiles.forEach((f, i) => {
-    const div = document.createElement('div');
-    const img = document.createElement('img');
-    img.style.maxWidth = '100%';
-    img.src = URL.createObjectURL(f);
-    div.appendChild(img);
-    previewList.appendChild(div);
-  });
+function validateName(n) { return /^[\u4e00-\u9fa5]{2,5}$/.test(n); }
+function validatePhone(p) { return /^1[3-9]\d{9}$/.test(p); }
 
-  document.getElementById('screenshotModal').style.display = 'flex';
+function getCurrentTime() {
+const d = new Date();
+return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,0)}-${String(d.getDate()).padStart(2,0)} ${String(d.getHours()).padStart(2,0)}:${String(d.getMinutes()).padStart(2,0)}:${String(d.getSeconds()).padStart(2,0)}`;
 }
 
-function closeScreenshotModal() {
-  document.getElementById('screenshotModal').style.display = 'none';
+function checkSchoolSelected(){
+let err = false;
+document.querySelectorAll('.car-check:checked').forEach(i => {
+const t = i.dataset.type;
+const s = document.getElementById(`school${t}`).querySelectorAll('select');
+let empty = false;
+s.forEach(se => { if(!se.value) empty=true; });
+if(empty) { document.getElementById(`error${t}`).style.display='block'; err=true; }
+});
+return !err;
+}
+
+function calcTotal(){
+let t = 0;
+document.querySelectorAll('.car-check:checked').forEach(i => t += Number(i.value));
+document.getElementById('totalPrice').innerText = t;
+return t;
+}
+
+function openPayModal(){
+const name = document.getElementById('userName').value.trim();
+const phone = document.getElementById('userPhone').value.trim();
+const total = calcTotal();
+
+if(!name || !validateName(name)) { 
+document.getElementById('nameError').style.display='block'; 
+showAlert('乘车人姓名必须是2-5个汉字！');
+return; 
+}
+
+if(!phone || !validatePhone(phone)) { 
+document.getElementById('phoneError').style.display='block';
+showAlert('请输入有效的11位手机号码！');
+return; 
+}
+
+if(total <=0) { showAlert('请选择乘坐车次'); return; }
+if(!checkSchoolSelected()) { showAlert('请选择完整的学校信息'); return; }
+
+document.getElementById('payModal').style.display='flex';
+}
+
+function closeQRModal(){ document.getElementById('qrModal').style.display = 'none'; }
+
+function showQR(type){
+const total = calcTotal();
+document.getElementById('payModal').style.display='none';
+selectedPayType = type === 'wechat' ? '微信' : '支付宝';
+const m = document.getElementById('qrModal');
+const title = document.getElementById('qrTitle');
+const img = document.getElementById('qrImg');
+const tip = document.getElementById('payTip');
+if(type === 'wechat') {
+title.innerText = `微信收款码 | 需支付：${total} 元`;
+img.src = 'https://st396007077.github.io/sqy.github.io/images/WX.png';
+tip.innerText = '请保存二维码到微信扫码完成支付';
+} else {
+title.innerText = `支付宝收款码 | 需支付：${total} 元`;
+img.src = 'https://st396007077.github.io/sqy.github.io/images/ZFB.jpg';
+tip.innerText = '请保存二维码到支付宝扫码完成支付';
+}
+m.style.display = 'flex';
+}
+
+function openScreenshotModal() {
+hasUploadedScreenshot = false;
+screenshotFiles = [];
+document.getElementById('screenshotInput').value = '';
+document.getElementById('previewContainer').innerHTML = '';
+document.getElementById('qrModal').style.display = 'none';
+document.getElementById('screenshotModal').style.display = 'flex';
+}
+
+function backToQRModal() {
+document.getElementById('screenshotModal').style.display = 'none';
+document.getElementById('qrModal').style.display = 'flex';
 }
 
 // ============================
 // ✅ 安全加固版：提交函数
 // ============================
 async function submitOrderSecure() {
-  if (isSubmitting) return; // 防重复提交
-  isSubmitting = true;
-
-  try {
-    const name = document.getElementById('userName').value.trim();
-    const phone = document.getElementById('userPhone').value.trim();
-    const total = calcTotal();
-
-    // 安全输入过滤
-    if (!/^[\u4e00-\u9fa5a-zA-Z]{2,8}$/.test(name)) {
-      alert('请输入正确姓名');
-      isSubmitting = false;
-      return;
-    }
-    if (!/^1[3-9]\d{9}$/.test(phone)) {
-      alert('请输入正确手机号');
-      isSubmitting = false;
-      return;
+    if (isSubmitting) {
+        showAlert('正在提交中，请勿重复操作！');
+        return;
     }
 
-    // 构造班次数据
-    const carList = [];
-    document.querySelectorAll('.car-check:checked').forEach(el => {
-      const type = el.dataset.type;
-      const name = el.dataset.name;
-      const price = el.value;
-      const sels = document.getElementById(`school${type}`)?.querySelectorAll('select');
-      let item = { name, price };
-      if (sels?.length === 1) item.school = sels[0].value.trim();
-      if (sels?.length === 2) item.from = sels[0].value.trim(), item.to = sels[1].value.trim();
-      carList.push(item);
-    });
-
-    // 1. 创建订单
-    const orderRes = await fetch(SERVER_URL + "/api/submitOrder", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        userName: name,
-        userPhone: phone,
-        payType: selectedPayType,
-        carList,
-        total,
-        createTime: new Date().toLocaleString()
-      })
-    });
-
-    const orderData = await orderRes.json();
-    if (orderData.code !== 0) {
-      alert('提交失败：' + (orderData.msg || '系统异常'));
-      isSubmitting = false;
-      return;
+    if (!hasUploadedScreenshot || screenshotFiles.length === 0) {
+        showAlert('请上传支付截图后再确认提交');
+        return;
     }
 
-    // 2. 上传截图
-    const form = new FormData();
-    form.append('orderId', orderData.orderId);
-    screenshotFiles.forEach(f => form.append('screenshots', f));
+    isSubmitting = true;
 
-    const uploadRes = await fetch(SERVER_URL + "/api/uploadScreenshot", {
-      method: "POST",
-      body: form
-    });
+    try {
+        const name = document.getElementById('userName').value.trim();
+        const phone = document.getElementById('userPhone').value.trim();
+        const total = calcTotal();
+        const createTime = getCurrentTime();
 
-    const uploadData = await uploadRes.json();
-    if (uploadData.code !== 0) {
-      // 回滚：上传失败删除订单
-      await fetch(`${SERVER_URL}/api/deleteOrder?orderId=${orderData.orderId}`, {
-        method: "DELETE"
-      });
-      alert('截图上传失败，已自动撤销订单');
-      isSubmitting = false;
-      return;
+        if (!validateName(name) || !validatePhone(phone)) {
+            showAlert('请填写正确的姓名和手机号！');
+            isSubmitting = false;
+            return;
+        }
+
+        let carList = [];
+        document.querySelectorAll('.car-check:checked').forEach(item => {
+            const t = item.dataset.type;
+            const name = item.dataset.name;
+            const price = item.value;
+            const sels = document.getElementById(`school${t}`).querySelectorAll('select');
+            let info = { name, price };
+            if (sels.length === 1) info.school = sels[0].value.trim();
+            if (sels.length === 2) {
+                info.from = sels[0].value.trim();
+                info.to = sels[1].value.trim();
+            }
+            carList.push(info);
+        });
+
+        // 1. 创建订单
+        const orderRes = await fetch(SERVER_URL + "/api/submitOrder", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                userName: name,
+                userPhone: phone,
+                total,
+                carList,
+                payType: selectedPayType,
+                createTime
+            })
+        });
+
+        const orderData = await orderRes.json();
+        if (orderData.code !== 0) {
+            showAlert("提交失败：" + (orderData.msg || "系统异常"));
+            isSubmitting = false;
+            return;
+        }
+
+        // 2. 上传截图
+        const formData = new FormData();
+        formData.append('orderId', orderData.orderId);
+        screenshotFiles.forEach(f => formData.append('screenshots', f));
+
+        const uploadRes = await fetch(SERVER_URL + "/api/uploadScreenshot", {
+            method: "POST",
+            body: formData
+        });
+
+        const uploadData = await uploadRes.json();
+        if (uploadData.code !== 0) {
+            await fetch(`${SERVER_URL}/api/deleteOrder?orderId=${orderData.orderId}`, { method: "DELETE" });
+            showAlert("截图上传失败，订单已自动撤销");
+            isSubmitting = false;
+            return;
+        }
+
+        // 成功
+        document.getElementById('screenshotModal').style.display = 'none';
+        let info = `
+<strong>乘车人：</strong>${name}<br>
+<strong>电话：</strong>${phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2')}<br>
+<strong>支付方式：</strong>${selectedPayType}<br>
+<strong>总费用：</strong>${total} 元<br>
+<strong>订单号：</strong>${orderData.orderId}<br>
+<strong>提交时间：</strong>${createTime}<br>
+<strong>已选班次：</strong><br>
+        `;
+        FIXED_CAR_ORDER.forEach(n => {
+            const item = carList.find(i => i.name === n);
+            if (item) {
+                info += `- ${item.name}<br>`;
+                if (item.school) info += `　学校：${item.school}<br>`;
+                if (item.from && item.to) info += `　${item.from}→${item.to}<br>`;
+            }
+        });
+        document.getElementById('successInfo').innerHTML = info;
+        document.getElementById('successModal').style.display = 'flex';
+        loadUserHistory();
+
+    } catch (e) {
+        console.error("提交失败：", e);
+        showAlert("提交失败：网络异常或文件格式错误");
+    } finally {
+        isSubmitting = false;
     }
+}
 
-    // 成功
-    closeScreenshotModal();
-    document.getElementById('successModal').style.display = 'flex';
+function closeSuccessModal(){ document.getElementById('successModal').style.display='none'; }
 
-  } catch (err) {
-    console.error(err);
-    alert('提交失败：网络异常或文件格式错误');
-  } finally {
-    isSubmitting = false;
-  }
+function openQueryModal(){
+document.getElementById('queryModal').style.display='flex';
+document.getElementById('queryName').value='';
+document.getElementById('queryPhone').value='';
+document.getElementById('queryResult').innerHTML='';
+}
+function closeQueryModal(){ document.getElementById('queryModal').style.display='none'; }
+
+function searchPayInfo(){
+const n = document.getElementById('queryName').value.trim();
+const p = document.getElementById('queryPhone').value.trim();
+if(!n || !p || !validatePhone(p)) { showAlert('请输入正确的姓名和手机号码'); return; }
+fetch(`${SERVER_URL}/api/queryOrder?userName=${encodeURIComponent(n)}`)
+.then(r=>r.json())
+.then(d=>{
+if(d.code!==0) return;
+const list = d.data.filter(i=>i.userPhone === p);
+if(list.length ===0) { document.getElementById('queryResult').innerHTML='<span style="color:red">未找到相关交费信息</span>'; return; }
+let html = '';
+list.forEach((item,idx)=>{
+html += `<div style="border-bottom:1px solid #eee;padding:10px 0">`;
+html += `<strong>订单 ${idx+1}</strong><br>`;
+html += `姓名：${item.userName}<br>电话：${item.userPhone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2')}<br>金额：${item.total} 元<br>班次：<br>`;
+FIXED_CAR_ORDER.forEach(n => {
+const c = item.carList.find(i=>i.name===n);
+if(c) {
+html += `- ${c.name}<br>`;
+if(c.school) html += `　学校：${c.school}<br>`;
+if(c.from&&c.to) html += `　${c.from}→${c.to}<br>`;
+}
+});
+html += `</div>`;
+});
+document.getElementById('queryResult').innerHTML = html;
+});
 }
 </script>
 </body>
