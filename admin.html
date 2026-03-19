@@ -401,40 +401,55 @@ function resetSearch() {
   renderTable();
 }
 
-// 导出Excel（包含截图链接）
+// 导出Excel（包含截图链接，修复语法错误）
 function exportExcel() {
-  if(filteredOrderData.length===0){showModal('提示','无数据');return;}
-  const excel = filteredOrderData.map(o=>{
-    const getInfo=(n)=>{
-      const i=o.carList.find(x=>x.name===n);
-      if(!i)return'-';
-      if(i.school)return i.school;
-      if(i.from&&i.to)return i.from+'→'+i.to;
-      return'-';
+  if(filteredOrderData.length === 0) {
+    showModal('提示', '暂无数据可导出');
+    return;
+  }
+  
+  const excelData = filteredOrderData.map(o => {
+    const getInfo = (n) => {
+      const i = o.carList.find(x => x.name === n);
+      if(!i) return '-';
+      if(i.school) return i.school;
+      if(i.from && i.to) return i.from + '→' + i.to;
+      return '-';
     };
+
     const payRecords = o.paymentRecords?.length
-      ? o.paymentRecords.map((r,i)=>`第${i+1}笔：${r.payType}${r.amount}元 ${r.time}`).join('；')
+      ? o.paymentRecords.map((r, i) => `第${i+1}笔：${r.payType} ${r.amount}元 ${r.time}`).join('；')
       : '-';
+      
     const screenshots = o.payScreenshots?.length
-      ? o.payScreenshots.map(u=>SERVER_URL+u).join('\n')
+      ? o.payScreenshots.map(u => SERVER_URL + u).join('\n')
       : '无截图';
+
+    // 核心修复：所有含特殊字符的键名用引号包裹，格式规范化
     return {
-      订单ID:o.orderId,姓名:o.userName,电话:o.userPhone,
-      支付方式:o.payType,支付记录:payRecords,付款信息截图链接:screenshots,
-      总金额:o.total+'元',最后提交时间:o.createTime,
-      4月11日早送:getInfo('4月11日早送'),
-      4月11日晚送:getInfo('4月11日晚接'),
-      4月12日早送:getInfo('4月12日早送'),
-      4月12日晚送:getInfo('4月12日晚接'),
-      4月11日中午:getInfo('4月11日中午考点更换'),
-      4月12日中午:getInfo('4月12日中午考点更换'),
+      '订单ID': o.orderId || '-',
+      '姓名': o.userName || '-',
+      '电话': o.userPhone || '-',
+      '支付方式': o.payType || '-',
+      '支付记录': payRecords,
+      '付款信息截图链接': screenshots,
+      '总金额': (o.total || 0) + ' 元',
+      '最后提交时间': o.createTime || '-',
+      '4月11日早送': getInfo('4月11日早送'),
+      '4月11日晚接': getInfo('4月11日晚接'),
+      '4月12日早送': getInfo('4月12日早送'),
+      '4月12日晚接': getInfo('4月12日晚接'),
+      '4月11日中午': getInfo('4月11日中午考点更换'),
+      '4月12日中午': getInfo('4月12日中午考点更换')
     };
   });
-  const ws=XLSX.utils.json_to_sheet(excel);
-  const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,'订单');
-  XLSX.writeFile(wb,`订单_${new Date().toLocaleDate_string()}.xlsx`);
-  showModal('成功','导出完成！');
+  
+  const ws = XLSX.utils.json_to_sheet(excelData);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '订单列表');
+  // 同时修正之前的拼写错误：toLocaleDateString（S大写）
+  XLSX.writeFile(wb, `订单列表_${new Date().toLocaleDateString()}.xlsx`);
+  showModal('成功', 'Excel导出成功！');
 }
 
 // 弹窗
