@@ -927,15 +927,6 @@ async function submitOrderWithScreenshot(){
             return;
         }
 
-        // 更新订单截图
-        await fetch(SERVER_URL + "/api/updateOrderScreenshots", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ 
-                orderId: orderData.orderId,
-                screenshots: uploadData.screenshotUrls
-            })
-        });
 
         // 成功提示
         document.getElementById('screenshotModal').style.display = 'none';
