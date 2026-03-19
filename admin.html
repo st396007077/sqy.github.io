@@ -52,7 +52,6 @@
     text-align:center;
     font-size: 20px;
   }
-  /* 状态说明文字样式（带颜色图标） */
   .status-desc {
     text-align: left;
     font-size: 14px;
@@ -61,7 +60,6 @@
     padding-left: 5px;
     line-height: 1.6;
   }
-  /* 颜色图标样式 */
   .color-tag {
     display: inline-block;
     width: 12px;
@@ -70,90 +68,43 @@
     margin-right: 5px;
     vertical-align: middle;
   }
-  .tag-white {
-    background-color: #ffffff;
-    border: 1px solid #ddd;
-  }
-  .tag-blue {
-    background-color: #e6f7ff;
-  }
-  .tag-red {
-    background-color: #fff2f0;
-  }
-  /* 数据库修改说明文字 */
+  .tag-white { background:#fff; border:1px solid #ddd; }
+  .tag-blue { background:#e6f7ff; }
+  .tag-red { background:#fff2f0; }
   .db-modify-desc {
-    text-align: left;
-    font-size: 13px;
-    color: #666;
-    margin-bottom: 15px;
-    padding-left: 5px;
-    line-height: 1.5;
+    text-align: left; font-size:13px; color:#666;
+    margin-bottom:15px; padding-left:5px; line-height:1.5;
   }
   .search-tools{
-    display:flex;
-    gap:10px;
-    margin-bottom:15px;
-    flex-wrap:wrap;
-    align-items:center;
+    display:flex; gap:10px; margin-bottom:15px;
+    flex-wrap:wrap; align-items:center;
   }
   .search-tools input{
-    padding:8px 10px;
-    border:1px solid #ddd;
-    border-radius:5px;
-    width:200px;
+    padding:8px 10px; border:1px solid #ddd;
+    border-radius:5px; width:200px;
   }
   .search-tools button{
-    padding:8px 16px;
-    background:#007bff;
-    color:white;
-    border:none;
-    border-radius:5px;
-    cursor:pointer;
+    padding:8px 16px; background:#007bff;
+    color:white; border:none; border-radius:5px; cursor:pointer;
   }
   .tools{
-    display:flex;
-    gap:8px;
-    margin-bottom:15px;
-    align-items:center;
-    justify-content:space-between;
-    flex-wrap: wrap;
+    display:flex; gap:8px; margin-bottom:15px;
+    align-items:center; justify-content:space-between; flex-wrap:wrap;
   }
   button{
-    padding:8px 16px;
-    background:#007bff;
-    color:white;
-    border:none;
-    border-radius:5px;
-    cursor:pointer;
+    padding:8px 16px; background:#007bff;
+    color:white; border:none; border-radius:5px; cursor:pointer;
   }
-  /* 新增：刷新金额按钮样式 */
   .refresh-amount-btn {
-    background: #28a745;
-    padding: 6px 10px;
-    font-size: 12px;
-    margin-right: 5px;
+    background: #28a745; padding:6px 10px; font-size:12px; margin-right:5px;
   }
-  button.del-btn{
-    background:#dc3545;
-    padding: 6px 10px;
-    font-size: 12px;
-  }
+  button.del-btn{ background:#dc3545; padding:6px 10px; font-size:12px; }
   button.exit-btn{background:#6c757d}
-  .table-container{
-    overflow-x: auto;
-    margin:10px 0;
-  }
-  table{
-    width:100%;
-    min-width: 1500px; /* 加宽表格，适配新增按钮 */
-    border-collapse:collapse;
-  }
+  .table-container{ overflow-x:auto; margin:10px 0; }
+  table{ width:100%; min-width:1700px; border-collapse:collapse; }
   th,td{
-    border:1px solid #ddd;
-    padding:8px 6px;
-    text-align:center;
-    white-space:nowrap;
-    font-size:13px;
+    border:1px solid #ddd; padding:8px 6px;
+    text-align:center; white-space:nowrap; font-size:13px;
   }
   th{background:#f8f9fa}
   .id-col{width:80px}
@@ -161,57 +112,43 @@
   .name-col{width:80px}
   .phone-col{width:110px}
   .paytype-col{width:100px}
-  .pay-record-col{width: 250px;}
+  .pay-record-col{width:250px;}
+  .pay-screenshot-col{width:220px;} /* 付款信息列 */
   .money-col{width:80px}
-  .oper-col{width:120px;} /* 加宽操作列 */
+  .oper-col{width:140px;}
   .class-col{width:120px}
-  .remark-col{width:150px}
-  /* 支付记录换行显示 */
   .pay-record {
-    white-space: pre-line;
-    text-align: left;
-    padding: 5px;
-    line-height: 1.4;
+    white-space:pre-line; text-align:left; padding:5px; line-height:1.4;
   }
-  /* 行标色样式 */
-  .row-modify { /* 最后操作为手动修改：红色 */
-    background-color: #fff2f0;
+  .pay-img-list { display:flex; flex-wrap:wrap; gap:4px; justify-content:center; }
+  .pay-img-item {
+    width:40px; height:40px; object-fit:cover;
+    border-radius:4px; cursor:pointer; border:1px solid #ddd;
   }
-  .row-multi-submit { /* 最后操作为多次提交：蓝色 */
-    background-color: #e6f7ff;
-  }
-  .row-first-submit { /* 最后操作为首次提交：白色 */
-    background-color: #ffffff;
-  }
-  /* 弹窗样式 */
+  .row-modify { background-color:#fff2f0; }
+  .row-multi-submit { background-color:#e6f7ff; }
+  .row-first-submit { background-color:#ffffff; }
   .modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
+    position:fixed; top:0; left:0; width:100%; height:100%;
+    background:rgba(0,0,0,0.7); display:none;
+    justify-content:center; align-items:center; z-index:9999;
   }
   .modal-content {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    max-width: 400px;
-    width: 90%;
-    text-align: center;
+    background:white; padding:20px; border-radius:8px;
+    max-width:90vw; text-align:center; position:relative;
+  }
+  .modal-img { max-width:90vw; max-height:80vh; object-fit:contain; }
+  .modal-close {
+    position:absolute; top:10px; right:15px;
+    font-size:24px; cursor:pointer; color:#fff;
+  }
+  .modal-download {
+    margin-top:10px; padding:8px 16px;
+    background:#28a745; color:white; border:none; border-radius:5px; cursor:pointer;
   }
   .modal-btn {
-    margin-top: 15px;
-    padding: 8px 20px;
-    background: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+    margin-top:15px; padding:8px 20px;
+    background:#007bff; color:white; border:none; border-radius:5px; cursor:pointer;
   }
 </style>
 </head>
@@ -225,31 +162,31 @@
 
 <div class="container" id="adminBox">
   <h1>订单管理</h1>
-  <!-- 优化：状态说明文字（按最后操作类型） -->
   <div class="status-desc">
-    <span class="color-tag tag-white"></span>白色：最后操作为首次提交　
-    <span class="color-tag tag-blue"></span>蓝色：最后操作为多次提交　
-    <span class="color-tag tag-red"></span>红色：最后操作为手动修改
+    <span class="color-tag tag-white"></span>白色：首次提交　
+    <span class="color-tag tag-blue"></span>蓝色：多次提交　
+    <span class="color-tag tag-red"></span>红色：手动修改
   </div>
-  <!-- 数据库修改说明文字 -->
   <div class="db-modify-desc">
-    1. 在数据库中手动修改某条订单的班次（新增/删除）后，需要点击「刷新金额」按钮同步金额；<br>
-    2. 修改完成后会自动标记最后操作为「手动修改」，行显示红色（优先级最高）；<br>
-    3. 仅多次提交未手动修改时显示蓝色，首次提交显示白色
+    1. 数据库修改班次后请点「刷新金额」<br>
+    2. 手动修改标红，多次提交标蓝，首次提交白色
   </div>
+
   <div class="search-tools">
     <input type="text" id="searchName" placeholder="姓名查询">
     <input type="text" id="searchPhone" placeholder="电话查询">
     <button onclick="searchOrders()">查询</button>
     <button onclick="resetSearch()">重置</button>
   </div>
+
   <div class="tools">
-    <div style="display: flex; gap: 8px;">
+    <div style="display:flex;gap:8px;">
       <button onclick="load()">刷新</button>
       <button onclick="exportExcel()">导出Excel</button>
     </div>
     <button class="exit-btn" onclick="logout()">退出</button>
   </div>
+
   <div class="table-container">
     <table>
       <thead>
@@ -257,16 +194,17 @@
           <th class="id-col">订单ID</th>
           <th class="name-col">姓名</th>
           <th class="phone-col">电话</th>
-          <th class="paytype-col">最后支付方式</th>
-          <th class="pay-record-col">支付记录（每一笔）</th>
+          <th class="paytype-col">支付方式</th>
+          <th class="pay-record-col">支付记录</th>
+          <th class="pay-screenshot-col">付款信息</th> <!-- 新增列 -->
           <th class="money-col">总金额</th>
           <th class="time-col">最后提交时间</th>
           <th class="class-col">4月11日早送</th>
           <th class="class-col">4月11日晚接</th>
           <th class="class-col">4月12日早送</th>
           <th class="class-col">4月12日晚接</th>
-          <th class="class-col">4月11日中午更换</th>
-          <th class="class-col">4月12日中午更换</th>
+          <th class="class-col">4月11日中午</th>
+          <th class="class-col">4月12日中午</th>
           <th class="oper-col">操作</th>
         </tr>
       </thead>
@@ -275,46 +213,46 @@
   </div>
 </div>
 
-<!-- 操作结果弹窗 -->
+<!-- 图片预览弹窗 -->
+<div class="modal" id="imgModal">
+  <div class="modal-content">
+    <span class="modal-close" onclick="closeImgModal()">&times;</span>
+    <img class="modal-img" id="previewImg" src="">
+    <button class="modal-download" id="downloadBtn">下载图片</button>
+  </div>
+</div>
+
+<!-- 结果弹窗 -->
 <div class="modal" id="resultModal">
   <div class="modal-content">
     <h3 id="modalTitle">操作结果</h3>
-    <p id="modalMsg" style="margin: 15px 0; line-height: 1.6;"></p>
+    <p id="modalMsg" style="margin:15px 0;line-height:1.6;"></p>
     <button class="modal-btn" onclick="closeModal()">确定</button>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <script>
-// 核心配置
 const SERVER_URL = "https://zikaocar-server.onrender.com";
 const PWD = "sutong5560";
 let orderData = [];
 let filteredOrderData = [];
 
-// 固定班次排序
 const FIXED_CAR_ORDER = [
-    '4月11日早送',
-    '4月11日晚接',
-    '4月12日早送',
-    '4月12日晚接',
-    '4月11日中午考点更换',
-    '4月12日中午考点更换'
+  '4月11日早送','4月11日晚接','4月12日早送','4月12日晚接',
+  '4月11日中午考点更换','4月12日中午考点更换'
 ];
 
-// 登录函数
+// 登录
 function login(){
   const val = document.getElementById('pwd').value;
-  if(val !== PWD){
-    alert('密码错误');
-    return;
-  }
+  if(val !== PWD){ alert('密码错误'); return; }
   document.getElementById('loginBox').style.display = 'none';
   document.getElementById('adminBox').style.display = 'block';
   load();
 }
 
-// 退出登录
+// 退出
 function logout(){
   if(confirm('确定退出？')){
     document.getElementById('loginBox').style.display = 'block';
@@ -322,92 +260,55 @@ function logout(){
   }
 }
 
-// 加载所有订单
+// 加载订单
 async function load() {
   try {
     const res = await fetch(`${SERVER_URL}/api/getAllOrders?pwd=${PWD}`);
     const data = await res.json();
-    if(data.code !== 0) { 
-      showModal('操作提示', data.msg);
-      return; 
-    }
+    if(data.code !== 0) { showModal('提示', data.msg); return; }
     orderData = data.data;
     filteredOrderData = [...orderData];
     renderTable();
   } catch (err) {
-    showModal('错误', '加载失败：' + err.message);
+    showModal('错误', '加载失败：'+err.message);
   }
 }
 
-// 显示弹窗
-function showModal(title, msg) {
-  document.getElementById('modalTitle').innerText = title;
-  document.getElementById('modalMsg').innerText = msg;
-  document.getElementById('resultModal').style.display = 'flex';
+// 图片预览 + 下载
+function openImage(url) {
+  const fullUrl = SERVER_URL + url;
+  document.getElementById('previewImg').src = fullUrl;
+  document.getElementById('imgModal').style.display = 'flex';
+  document.getElementById('downloadBtn').onclick = () => {
+    const a = document.createElement('a');
+    a.href = fullUrl;
+    a.download = '支付截图';
+    a.target = '_blank';
+    a.click();
+  };
+}
+function closeImgModal() {
+  document.getElementById('imgModal').style.display = 'none';
 }
 
-// 关闭弹窗
-function closeModal() {
-  document.getElementById('resultModal').style.display = 'none';
-  load(); // 关闭弹窗后刷新表格
-}
-
-// 核心：刷新订单金额
-async function refreshAmount(orderId) {
-  if(!confirm('确定要刷新该订单的金额吗？\n（会根据当前班次重新计算并更新数据库）')) {
-    return;
-  }
-  
-  try {
-    const res = await fetch(`${SERVER_URL}/api/recalculateAmount`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        pwd: PWD,
-        orderId: orderId
-      })
-    });
-    const data = await res.json();
-    if(data.code === 0) {
-      showModal('成功', data.msg);
-    } else {
-      showModal('失败', data.msg);
-    }
-  } catch (err) {
-    showModal('错误', '刷新金额失败：' + err.message);
-  }
-}
-
-// 渲染订单表格（核心：按最后操作类型设置行颜色）
+// 渲染表格
 function renderTable() {
   const list = document.getElementById('list');
   list.innerHTML = '';
-  
   if(filteredOrderData.length === 0) {
-    list.innerHTML = '<tr><td colspan="14">暂无数据</td></tr>';
+    list.innerHTML = '<tr><td colspan="15">暂无数据</td></tr>';
     return;
   }
-  
+
   filteredOrderData.forEach(order => {
     const tr = document.createElement('tr');
-    
-    // ====================== 核心逻辑：按最后操作类型设置行颜色 ======================
     const lastOp = order.lastOperationType || 'submit';
     const submitCount = order.submitCount || 1;
-    
-    if (lastOp === 'modify') {
-      // 最后操作为手动修改：红色（最高优先级）
-      tr.className = 'row-modify';
-    } else if (lastOp === 'submit' && submitCount > 1) {
-      // 最后操作为提交且多次提交：蓝色
-      tr.className = 'row-multi-submit';
-    } else {
-      // 最后操作为提交且首次提交：白色
-      tr.className = 'row-first-submit';
-    }
-    // ==============================================================================
-    
-    // 封装获取班次信息的函数
+
+    if (lastOp === 'modify') tr.className = 'row-modify';
+    else if (submitCount > 1) tr.className = 'row-multi-submit';
+    else tr.className = 'row-first-submit';
+
     const getClassInfo = (name) => {
       const item = order.carList.find(i => i.name === name);
       if(!item) return '-';
@@ -416,21 +317,30 @@ function renderTable() {
       return '-';
     };
 
-    // 格式化支付记录
     const formatPaymentRecords = () => {
-      if(!order.paymentRecords || order.paymentRecords.length === 0) return '-';
-      return order.paymentRecords.map((record, index) => {
-        return `第${index+1}笔：${record.payType} ${record.amount}元 ${record.time}`;
-      }).join('\n');
+      if(!order.paymentRecords?.length) return '-';
+      return order.paymentRecords.map((r,i)=>
+        `第${i+1}笔：${r.payType} ${r.amount}元 ${r.time}`
+      ).join('\n');
     };
-    
+
+    // 付款信息截图
+    const renderScreenshots = () => {
+      const arr = order.payScreenshots || [];
+      if(arr.length === 0) return '<span style="color:#999">无截图</span>';
+      return `<div class="pay-img-list">
+        ${arr.map(u=>`<img src="${SERVER_URL}${u}" class="pay-img-item" onclick="openImage('${u}')">`).join('')}
+      </div>`;
+    };
+
     tr.innerHTML = `
       <td>${order.orderId || '-'}</td>
       <td>${order.userName || '-'}</td>
       <td>${order.userPhone || '-'}</td>
       <td>${order.payType || '-'}</td>
       <td class="pay-record">${formatPaymentRecords()}</td>
-      <td>${order.total || 0} 元</td>
+      <td>${renderScreenshots()}</td>
+      <td>${order.total || 0}元</td>
       <td>${order.createTime || '-'}</td>
       <td>${getClassInfo('4月11日早送')}</td>
       <td>${getClassInfo('4月11日晚接')}</td>
@@ -447,35 +357,43 @@ function renderTable() {
   });
 }
 
-// 删除订单
-async function deleteOrder(id) {
-  if(!confirm('确定删除该订单？')) return;
+// 刷新金额
+async function refreshAmount(orderId) {
+  if(!confirm('确定刷新金额？')) return;
   try {
-    const res = await fetch(`${SERVER_URL}/api/deleteOrder`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pwd: PWD, id })
+    const res = await fetch(`${SERVER_URL}/api/recalculateAmount`,{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ pwd:PWD, orderId })
     });
     const data = await res.json();
-    showModal(data.code === 0 ? '成功' : '失败', data.msg);
-  } catch (err) {
-    showModal('错误', '删除失败：' + err.message);
-  }
+    showModal(data.code===0?'成功':'失败', data.msg);
+  } catch(e){ showModal('错误','失败：'+e.message); }
 }
 
-// 搜索订单
+// 删除
+async function deleteOrder(id) {
+  if(!confirm('确定删除？')) return;
+  try {
+    const res = await fetch(`${SERVER_URL}/api/deleteOrder`,{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ pwd:PWD, id })
+    });
+    const data = await res.json();
+    showModal(data.code===0?'成功':'失败', data.msg);
+  } catch(e){ showModal('错误','失败：'+e.message); }
+}
+
+// 搜索
 function searchOrders() {
   const name = document.getElementById('searchName').value.trim();
   const phone = document.getElementById('searchPhone').value.trim();
-  
-  filteredOrderData = orderData.filter(o => 
-    (o.userName || '').includes(name) && 
-    (o.userPhone || '').includes(phone)
+  filteredOrderData = orderData.filter(o=>
+    (o.userName||'').includes(name) && (o.userPhone||'').includes(phone)
   );
   renderTable();
 }
 
-// 重置搜索
+// 重置
 function resetSearch() {
   document.getElementById('searchName').value = '';
   document.getElementById('searchPhone').value = '';
@@ -483,62 +401,51 @@ function resetSearch() {
   renderTable();
 }
 
-// 导出Excel
+// 导出Excel（包含截图链接）
 function exportExcel() {
-  if(filteredOrderData.length === 0) { 
-    showModal('提示', '暂无数据可导出');
-    return; 
-  }
-  
-  const excelData = filteredOrderData.map(o => {
-    const getInfo = (n) => {
-      const i = o.carList.find(x=>x.name===n);
-      if(!i) return '-';
-      if(i.school) return i.school;
-      if(i.from&&i.to) return i.from+'→'+i.to;
-      return '-';
+  if(filteredOrderData.length===0){showModal('提示','无数据');return;}
+  const excel = filteredOrderData.map(o=>{
+    const getInfo=(n)=>{
+      const i=o.carList.find(x=>x.name===n);
+      if(!i)return'-';
+      if(i.school)return i.school;
+      if(i.from&&i.to)return i.from+'→'+i.to;
+      return'-';
     };
-
-    const getPaymentRecords = () => {
-      if(!o.paymentRecords || o.paymentRecords.length === 0) return '-';
-      return o.paymentRecords.map((r, i) => `第${i+1}笔：${r.payType} ${r.amount}元 ${r.time}`).join('；');
-    };
-
-    // 补充最后操作类型说明
-    let lastOpDesc = '首次提交';
-    const lastOp = o.lastOperationType || 'submit';
-    const submitCount = o.submitCount || 1;
-    if (lastOp === 'modify') {
-      lastOpDesc = '手动修改';
-    } else if (lastOp === 'submit' && submitCount > 1) {
-      lastOpDesc = '多次提交';
-    }
-
+    const payRecords = o.paymentRecords?.length
+      ? o.paymentRecords.map((r,i)=>`第${i+1}笔：${r.payType}${r.amount}元 ${r.time}`).join('；')
+      : '-';
+    const screenshots = o.payScreenshots?.length
+      ? o.payScreenshots.map(u=>SERVER_URL+u).join('\n')
+      : '无截图';
     return {
-      订单ID: o.orderId || '-',
-      姓名: o.userName || '-',
-      电话: o.userPhone || '-',
-      最后支付方式: o.payType || '-',
-      支付记录: getPaymentRecords(),
-      总金额: o.total || 0 + ' 元',
-      最后提交时间: o.createTime || '-',
-      '4月11日早送': getInfo('4月11日早送'),
-      '4月11日晚接': getInfo('4月11日晚接'),
-      '4月12日早送': getInfo('4月12日早送'),
-      '4月12日晚接': getInfo('4月12日晚接'),
-      '4月11日中午更换': getInfo('4月11日中午考点更换'),
-      '4月12日中午更换': getInfo('4月12日中午考点更换'),
-      提交次数: o.submitCount || 1,
-      最后操作类型: lastOpDesc, // Excel中显示最后操作类型
-      是否手动修改: o.isModified ? '是' : '否'
+      订单ID:o.orderId,姓名:o.userName,电话:o.userPhone,
+      支付方式:o.payType,支付记录:payRecords,付款信息截图链接:screenshots,
+      总金额:o.total+'元',最后提交时间:o.createTime,
+      4月11日早送:getInfo('4月11日早送'),
+      4月11日晚送:getInfo('4月11日晚接'),
+      4月12日早送:getInfo('4月12日早送'),
+      4月12日晚送:getInfo('4月12日晚接'),
+      4月11日中午:getInfo('4月11日中午考点更换'),
+      4月12日中午:getInfo('4月12日中午考点更换'),
     };
   });
-  
-  const ws = XLSX.utils.json_to_sheet(excelData);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, '订单列表');
-  XLSX.writeFile(wb, `订单列表_${new Date().toLocaleDateString()}.xlsx`);
-  showModal('成功', 'Excel导出成功！');
+  const ws=XLSX.utils.json_to_sheet(excel);
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'订单');
+  XLSX.writeFile(wb,`订单_${new Date().toLocaleDate_string()}.xlsx`);
+  showModal('成功','导出完成！');
+}
+
+// 弹窗
+function showModal(t,m){
+  document.getElementById('modalTitle').innerText=t;
+  document.getElementById('modalMsg').innerText=m;
+  document.getElementById('resultModal').style.display='flex';
+}
+function closeModal(){
+  document.getElementById('resultModal').style.display='none';
+  load();
 }
 </script>
 </body>
