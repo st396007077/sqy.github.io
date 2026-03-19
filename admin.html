@@ -260,7 +260,7 @@ document.getElementById('imgModal').style.display = 'none';
 }
 
 // ==========================
-// ✅ 彻底修复：多次提交自动变蓝
+// ✅ 最终修复：读取后端返回的标记自动变色
 // ==========================
 function renderTable() {
 const list = document.getElementById('list');
@@ -270,21 +270,13 @@ list.innerHTML = '<tr><td colspan="15">暂无数据</td></tr>';
 return;
 }
 
-// 统计每个【姓名+电话】出现次数（核心判断）
-const userCount = {};
-filteredOrderData.forEach(item => {
-const key = (item.userName || '') + '|' + (item.userPhone || '');
-userCount[key] = (userCount[key] || 0) + 1;
-});
-
 filteredOrderData.forEach(order => {
 const tr = document.createElement('tr');
-const key = (order.userName || '') + '|' + (order.userPhone || '');
 
-// 优先级：红色（手动修改） > 蓝色（多次提交） > 白色
+// 优先级：手动修改(红) > 多次提交(蓝) > 首次(白)
 if (order.isManuallyModified) {
 tr.className = 'row-modify';
-} else if (userCount[key] > 1) {
+} else if (order.isMultiSubmit) {
 tr.className = 'row-multi-submit';
 } else {
 tr.className = 'row-first-submit';
