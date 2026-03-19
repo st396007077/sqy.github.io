@@ -772,75 +772,99 @@
         document.getElementById('qrModal').style.display = 'flex';
     }
 
-    // 提交订单 + 上传截图
-    async function submitOrderWithScreenshot(){
-        if (!hasUploadedScreenshot) {
-            alert('请上传支付截图后再确认提交');
+// 提交订单 + 上传截图（修复版）
+async function submitOrderWithScreenshot(){
+    if (!hasUploadedScreenshot) {
+        alert('请上传支付截图后再确认提交');
+        return;
+    }
+
+    try {
+        const name = document.getElementById('userName').value.trim();
+        const phone = document.getElementById('userPhone').value.trim();
+        const total = calcTotal();
+        const createTime = getCurrentTime();
+        
+        let carList = [];
+        document.querySelectorAll('.car-check:checked').forEach(item => {
+            const t = item.dataset.type;
+            const name = item.dataset.name;
+            const price = item.value;
+            const sels = document.getElementById(`school${t}`).querySelectorAll('select');
+            let info = { name, price };
+            if(sels.length ===1) info.school = sels[0].value;
+            if(sels.length ===2) { info.from = sels[0].value; info.to = sels[1].value; }
+            carList.push(info);
+        });
+
+        // 步骤1：提交订单（先获取orderId）
+        const orderRes = await fetch(SERVER_URL + "/api/submitOrder", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userName:name, userPhone:phone, total, carList, payType:selectedPayType, createTime })
+        });
+        const orderData = await orderRes.json();
+        if(orderData.code !==0) { 
+            alert("提交失败："+orderData.msg); 
+            return; 
+        }
+
+        // 步骤2：上传所有图片（增加返回值校验）
+        const formData = new FormData();
+        formData.append('orderId', orderData.orderId);
+        screenshotFiles.forEach(f => formData.append('screenshots', f));
+
+        const uploadRes = await fetch(SERVER_URL + "/api/uploadScreenshot", {
+            method: "POST",
+            body: formData
+        });
+        const uploadData = await uploadRes.json(); // 要求后端返回JSON格式结果
+        
+        // 校验上传是否成功
+        if(uploadData.code !== 0) {
+            alert("截图上传失败：" + uploadData.msg);
+            // 可选：删除已提交的空订单（需后端配合接口）
+            await fetch(`${SERVER_URL}/api/deleteOrder?orderId=${orderData.orderId}`, { method: "DELETE" });
             return;
         }
 
-        try {
-            const name = document.getElementById('userName').value.trim();
-            const phone = document.getElementById('userPhone').value.trim();
-            const total = calcTotal();
-            const createTime = getCurrentTime();
-            
-            let carList = [];
-            document.querySelectorAll('.car-check:checked').forEach(item => {
-                const t = item.dataset.type;
-                const name = item.dataset.name;
-                const price = item.value;
-                const sels = document.getElementById(`school${t}`).querySelectorAll('select');
-                let info = { name, price };
-                if(sels.length ===1) info.school = sels[0].value;
-                if(sels.length ===2) { info.from = sels[0].value; info.to = sels[1].value; }
-                carList.push(info);
-            });
+        // 步骤3：（可选）更新订单的截图路径（若后端需要二次关联）
+        await fetch(SERVER_URL + "/api/updateOrderScreenshots", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ 
+                orderId: orderData.orderId,
+                screenshots: uploadData.screenshotUrls // 后端返回的截图路径列表
+            })
+        });
 
-            // 提交订单
-            const orderRes = await fetch(SERVER_URL + "/api/submitOrder", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ userName:name, userPhone:phone, total, carList, payType:selectedPayType, createTime })
-            });
-            const orderData = await orderRes.json();
-            if(orderData.code !==0) { alert("提交失败："+orderData.msg); return; }
-
-            // 上传所有图片
-            const formData = new FormData();
-            formData.append('orderId', orderData.orderId);
-            screenshotFiles.forEach(f => formData.append('screenshots', f));
-
-            await fetch(SERVER_URL + "/api/uploadScreenshot", {
-                method: "POST",
-                body: formData
-            });
-
-            document.getElementById('screenshotModal').style.display = 'none';
-            let info = `
-                <strong>乘车人：</strong>${name}<br>
-                <strong>电话：</strong>${phone}<br>
-                <strong>支付方式：</strong>${selectedPayType}<br>
-                <strong>总费用：</strong>${total} 元<br>
-                <strong>订单号：</strong>${orderData.orderId}<br>
-                <strong>提交时间：</strong>${createTime}<br>
-                <strong>已选班次：</strong><br>
-            `;
-            FIXED_CAR_ORDER.forEach(n => {
-                const item = carList.find(i => i.name === n);
-                if(item) {
-                    info += `- ${item.name}<br>`;
-                    if(item.school) info += `　学校：${item.school}<br>`;
-                    if(item.from && item.to) info += `　${item.from}→${item.to}<br>`;
-                }
-            });
-            document.getElementById('successInfo').innerHTML = info;
-            document.getElementById('successModal').style.display = 'flex';
-            loadUserHistory();
-        } catch (e) {
-            alert("提交失败：网络异常");
-        }
+        // 提交成功提示
+        document.getElementById('screenshotModal').style.display = 'none';
+        let info = `
+            <strong>乘车人：</strong>${name}<br>
+            <strong>电话：</strong>${phone}<br>
+            <strong>支付方式：</strong>${selectedPayType}<br>
+            <strong>总费用：</strong>${total} 元<br>
+            <strong>订单号：</strong>${orderData.orderId}<br>
+            <strong>提交时间：</strong>${createTime}<br>
+            <strong>已选班次：</strong><br>
+        `;
+        FIXED_CAR_ORDER.forEach(n => {
+            const item = carList.find(i => i.name === n);
+            if(item) {
+                info += `- ${item.name}<br>`;
+                if(item.school) info += `　学校：${item.school}<br>`;
+                if(item.from && item.to) info += `　${item.from}→${item.to}<br>`;
+            }
+        });
+        document.getElementById('successInfo').innerHTML = info;
+        document.getElementById('successModal').style.display = 'flex';
+        loadUserHistory();
+    } catch (e) {
+        console.error("提交失败详情：", e); // 控制台打印错误，方便调试
+        alert("提交失败：网络异常/文件上传失败，请检查截图格式或重试");
     }
+}
 
     function closeSuccessModal(){ document.getElementById('successModal').style.display='none'; }
 
