@@ -274,9 +274,9 @@ async function load() {
   }
 }
 
-// 图片预览 + 下载
+// 图片预览 + 下载（修复：无需拼接SERVER_URL）
 function openImage(url) {
-  const fullUrl = SERVER_URL + url;
+  const fullUrl = url;
   document.getElementById('previewImg').src = fullUrl;
   document.getElementById('imgModal').style.display = 'flex';
   document.getElementById('downloadBtn').onclick = () => {
@@ -324,12 +324,12 @@ function renderTable() {
       ).join('\n');
     };
 
-    // 付款信息截图
+    // 付款信息截图（修复：无需拼接SERVER_URL）
     const renderScreenshots = () => {
       const arr = order.payScreenshots || [];
       if(arr.length === 0) return '<span style="color:#999">无截图</span>';
       return `<div class="pay-img-list">
-        ${arr.map(u=>`<img src="${SERVER_URL}${u}" class="pay-img-item" onclick="openImage('${u}')">`).join('')}
+        ${arr.map(u=>`<img src="${u}" class="pay-img-item" onclick="openImage('${u}')">`).join('')}
       </div>`;
     };
 
@@ -422,7 +422,7 @@ function exportExcel() {
       : '-';
       
     const screenshots = o.payScreenshots?.length
-      ? o.payScreenshots.map(u => SERVER_URL + u).join('\n')
+      ? o.payScreenshots.map(u => u).join('\n') // 修复：直接使用完整URL
       : '无截图';
 
     // 核心修复：所有含特殊字符的键名用引号包裹，格式规范化
