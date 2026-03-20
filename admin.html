@@ -105,7 +105,6 @@ border-radius:4px;cursor:pointer;border:1px solid #ddd;
 .row-multi-submit { background-color:#e6f7ff !important }
 .row-first-submit { background-color:#fff !important }
 
-/* 弹窗优化（大弹窗） */
 .modal {
 position:fixed;top:0;left:0;width:100%;height:100%;
 background:rgba(0,0,0,0.85);display:none;
@@ -378,10 +377,11 @@ function resetSearch() {
 }
 
 // ======================
-// ✅ 优化：导出Excel 包含 付款截图链接
+// ✅ 已修复：导出Excel（支持图片URL，不报错）
 // ======================
 function exportExcel() {
   if(!filteredOrderData.length) { showModal('提示','暂无数据'); return; }
+
   const excelData = filteredOrderData.map(o => {
     const getInfo = (n) => {
       const i = o.carList.find(x => x.name === n);
@@ -390,12 +390,12 @@ function exportExcel() {
       if(i.from && i.to) return i.from+'→'+i.to;
       return '-';
     };
-    // 支付记录：每笔用 \n 换行
+
     const payRecords = o.paymentRecords?.length
       ? o.paymentRecords.map((r,i)=>`第${i+1}笔：${r.payType} ${r.amount}元 ${r.time}`).join('\n')
       : '-';
 
-    // 付款截图链接：多张用 \n 换行
+    // 图片链接（多张用换行分隔）
     const screenshotUrls = o.payScreenshots?.length
       ? o.payScreenshots.join('\n')
       : '无截图';
@@ -405,7 +405,7 @@ function exportExcel() {
       '姓名': o.userName,
       '电话': o.userPhone,
       '支付方式': o.payType,
-      '支付记录': payRecords,  // 已改为 \n 换行
+      '支付记录': payRecords,
       '付款截图链接': screenshotUrls,
       '总金额': o.total+'元',
       '提交时间': o.createTime,
@@ -418,30 +418,11 @@ function exportExcel() {
     };
   });
 
-  // 生成工作表
   const ws = XLSX.utils.json_to_sheet(excelData);
-
-  // ✅ 关键：给所有单元格设置自动换行样式
-  const range = XLSX.utils.decode_range(ws['!ref']);
-  const wrapStyle = {
-    alignment: {
-      wrapText: true,  // 开启自动换行
-      vertical: 'top'  // 顶部对齐，更美观
-    }
-  };
-  for (let row = range.s.r; row <= range.e.r; row++) {
-    for (let col = range.s.c; col <= range.e.c; col++) {
-      const cellAddr = XLSX.utils.encode_cell({ r: row, c: col });
-      if (ws[cellAddr]) {
-        ws[cellAddr].s = wrapStyle;
-      }
-    }
-  }
-
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, '订单');
   XLSX.writeFile(wb, `订单_${new Date().toLocaleDateString()}.xlsx`);
-  showModal('成功','导出完成');
+  showModal('成功','导出完成！');
 }
 
 function showModal(t,m){
