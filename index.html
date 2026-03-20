@@ -417,7 +417,7 @@ font-size: 15px;
 <span>4月11日早送（20元）</span>
 </div>
 <div class="school-select" id="school1">
-<select class="school-select-input" data-type="1" onchange="saveFormData()">
+<select class="school-select-input" data-type="1" onchange="this.closest('.school-select').querySelector('.error-tip').style.display='none';saveFormData()">
 <option value="">请选择到达学校</option>
 <option>绣水中学</option>
 <option>实验小学</option>
@@ -436,7 +436,7 @@ font-size: 15px;
 <span>4月11日晚接（20元）</span>
 </div>
 <div class="school-select" id="school2">
-<select class="school-select-input" data-type="2" onchange="saveFormData()">
+<select class="school-select-input" data-type="2" onchange="this.closest('.school-select').querySelector('.error-tip').style.display='none';saveFormData()">
 <option value="">请选择出发学校</option>
 <option>绣水中学</option>
 <option>实验小学</option>
@@ -455,7 +455,7 @@ font-size: 15px;
 <span>4月12日早送（20元）</span>
 </div>
 <div class="school-select" id="school3">
-<select class="school-select-input" data-type="3" onchange="saveFormData()">
+<select class="school-select-input" data-type="3" onchange="this.closest('.school-select').querySelector('.error-tip').style.display='none';saveFormData()">
 <option value="">请选择到达学校</option>
 <option>绣水中学</option>
 <option>实验小学</option>
@@ -474,7 +474,7 @@ font-size: 15px;
 <span>4月12日晚接（20元）</span>
 </div>
 <div class="school-select" id="school4">
-<select class="school-select-input" data-type="4" onchange="saveFormData()">
+<select class="school-select-input" data-type="4" onchange="this.closest('.school-select').querySelector('.error-tip').style.display='none';saveFormData()">
 <option value="">请选择出发学校</option>
 <option>绣水中学</option>
 <option>实验小学</option>
@@ -493,7 +493,7 @@ font-size: 15px;
 <span>4月11日中午考点更换（3元）</span>
 </div>
 <div class="school-select" id="school5">
-<select class="school-select-input" data-type="5" style="margin-bottom:8px" onchange="saveFormData()">
+<select class="school-select-input" data-type="5" style="margin-bottom:8px" onchange="this.closest('.school-select').querySelector('.error-tip').style.display='none';saveFormData()">
 <option value="">请选择出发学校</option>
 <option>绣水中学</option>
 <option>实验小学</option>
@@ -502,7 +502,7 @@ font-size: 15px;
 <option>鲁能实验小学</option>
 <option>中等职业学校</option>
 </select>
-<select class="school-select-input" data-type="5" onchange="saveFormData()">
+<select class="school-select-input" data-type="5" onchange="this.closest('.school-select').querySelector('.error-tip').style.display='none';saveFormData()">
 <option value="">请选择送达学校</option>
 <option>绣水中学</option>
 <option>实验小学</option>
@@ -521,7 +521,7 @@ font-size: 15px;
 <span>4月12日中午考点更换（3元）</span>
 </div>
 <div class="school-select" id="school6">
-<select class="school-select-input" data-type="6" style="margin-bottom:8px" onchange="saveFormData()">
+<select class="school-select-input" data-type="6" style="margin-bottom:8px" onchange="this.closest('.school-select').querySelector('.error-tip').style.display='none';saveFormData()">
 <option value="">请选择出发学校</option>
 <option>绣水中学</option>
 <option>实验小学</option>
@@ -530,7 +530,7 @@ font-size: 15px;
 <option>鲁能实验小学</option>
 <option>中等职业学校</option>
 </select>
-<select class="school-select-input" data-type="6" onchange="saveFormData()">
+<select class="school-select-input" data-type="6" onchange="this.closest('.school-select').querySelector('.error-tip').style.display='none';saveFormData()">
 <option value="">请选择送达学校</option>
 <option>绣水中学</option>
 <option>实验小学</option>
@@ -774,7 +774,7 @@ function showAlert(message) {
     alertDiv.innerHTML = `
 <div class="alert-content">
 <div class="alert-text">${message}</div>
-<button class="alert-btn" onclick="this.closest('.custom-alert').remove()">确定</button>
+<button class="alert-btn" onclick="this.closest('.custom-alert').remove();document.querySelectorAll('.error-tip').forEach(t=>t.style.display='none')">确定</button>
 </div>`;
     document.body.appendChild(alertDiv);
 }
