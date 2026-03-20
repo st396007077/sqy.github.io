@@ -392,7 +392,7 @@ font-size: 15px;
 1. 请准确填写个人姓名和联系电话，用于乘车核验；<br>
 2. 勾选需要乘坐的车次（可多选），系统自动计算总费用；<br>
 3. 确认费用后点击支付，选择支付方式完成交费；<br>
-4. 支付完成后需要返回页面点击"已完成支付"，才能提交乘坐信息；<br>
+4. 支付完成后需要返回页面点击“已完成支付”，才能提交乘坐信息；<br>
 5. 已提交的班次无法再次选择，如需修改请联系群主。
 </div>
 
@@ -568,13 +568,9 @@ font-size: 15px;
 <div class="modal" id="qrModal">
 <div class="modal-content">
 <h3 id="qrTitle">微信收款码</h3>
-<!-- ✅ 方案4：新增二维码加载提示区域 -->
-<div id="qrLoading" style="display:none; color:#666; padding:20px;">
-<p>正在加载二维码，请稍候...</p>
-</div>
 <img class="qrcode-img" id="qrImg" src="">
 <p class="pay-tip" id="payTip">请保存二维码到微信扫码完成支付</p>
-<div class="red-bg-tip">【支付完成后需要返回页面点击"已完成支付"，提交支付截图才能提交乘坐信息！！！】</div>
+<div class="red-bg-tip">【支付完成后需要返回页面点击“已完成支付”，提交支付截图才能提交乘坐信息！！！】</div>
 
 <div class="modal-btns" style="margin-top:20px">
 <button class="close-btn" style="background:#6c757d" onclick="closeQRModal()">关闭</button>
@@ -701,10 +697,32 @@ function loadFormData() {
     calcTotal();
 
     setTimeout(() => {
-        if (data.openModal === 'payModal') document.getElementById('payModal').style.display = 'flex';
+        // 先关闭所有弹窗
+        document.getElementById('payModal').style.display = 'none';
+        document.getElementById('qrModal').style.display = 'none';
+        document.getElementById('screenshotModal').style.display = 'none';
+
+        if (data.openModal === 'payModal') {
+            document.getElementById('payModal').style.display = 'flex';
+        }
         if (data.openModal === 'qrModal') {
             document.getElementById('payModal').style.display = 'none';
-            document.getElementById('qrModal').style.display = 'flex';
+            // ✅ 修复：重新加载二维码图片
+            const total = calcTotal();
+            const m = document.getElementById('qrModal');
+            const title = document.getElementById('qrTitle');
+            const img = document.getElementById('qrImg');
+            const tip = document.getElementById('payTip');
+            if (selectedPayType === '微信') {
+                title.innerText = `微信收款码 | 需支付：${total} 元`;
+                img.src = 'https://st396007077.github.io/sqy.github.io/images/WX.png';
+                tip.innerText = '请保存二维码到微信扫码完成支付';
+            } else if (selectedPayType === '支付宝') {
+                title.innerText = `支付宝收款码 | 需支付：${total} 元`;
+                img.src = 'https://st396007077.github.io/sqy.github.io/images/ZFB.jpg';
+                tip.innerText = '请保存二维码到支付宝扫码完成支付';
+            }
+            m.style.display = 'flex';
         }
         if (data.openModal === 'screenshotModal') {
             document.getElementById('qrModal').style.display = 'none';
@@ -724,26 +742,11 @@ function onCarChange() {
     saveFormData();
 }
 
-// ✅ 方案1+方案4：预加载二维码图片
-function preloadQRImages() {
-    const wechatImg = new Image();
-    const alipayImg = new Image();
-    
-    // 添加时间戳防止缓存
-    wechatImg.src = 'https://st396007077.github.io/sqy.github.io/images/WX.png?v=' + Date.now();
-    alipayImg.src = 'https://st396007077.github.io/sqy.github.io/images/ZFB.jpg?v=' + Date.now();
-    
-    console.log('二维码图片预加载完成');
-}
-
 window.addEventListener('DOMContentLoaded', () => {
     loadFormData();
     document.querySelectorAll('.car-check').forEach(i => {
         i.addEventListener('change', onCarChange.bind(i));
     });
-    
-    // ✅ 新增：页面加载时预加载二维码图片
-    preloadQRImages();
 });
 
 // ==============================================
@@ -784,7 +787,7 @@ function previewScreenshot() {
     const newFiles = Array.from(fileInput.files);
     for (let f of newFiles) {
         if (!f.type.startsWith('image/')) { showAlert('仅支持图片！'); return; }
-        if (f.size > 10 * 1024 * 1024) { showAlert('图片不能超过10M！'); return; }
+        if (f.size > 10*1024*1024) { showAlert('图片不能超过10M！'); return; }
     }
     screenshotFiles = [...screenshotFiles, ...newFiles];
     hasUploadedScreenshot = true;
@@ -898,7 +901,6 @@ function closeQRModal(){
     saveFormData();
 }
 
-// ✅ 方案1+方案4：优化二维码显示函数
 function showQR(type){
     const total = calcTotal();
     document.getElementById('payModal').style.display='none';
@@ -907,60 +909,16 @@ function showQR(type){
     const title = document.getElementById('qrTitle');
     const img = document.getElementById('qrImg');
     const tip = document.getElementById('payTip');
-    const loading = document.getElementById('qrLoading');
-    
-    // ✅ 方案4：显示加载提示
-    loading.style.display = 'block';
-    img.style.display = 'none';
-    
     if(type === 'wechat') {
         title.innerText = `微信收款码 | 需支付：${total} 元`;
+        img.src = 'https://st396007077.github.io/sqy.github.io/images/WX.png';
         tip.innerText = '请保存二维码到微信扫码完成支付';
-        
-        // ✅ 方案1：创建新的Image对象确保图片加载
-        const wechatImage = new Image();
-        
-        // ✅ 方案1：添加时间戳防止浏览器缓存
-        const wechatUrl = 'https://st396007077.github.io/sqy.github.io/images/WX.png?v=' + Date.now();
-        
-        wechatImage.onload = function() {
-            // 图片加载成功后显示
-            img.src = this.src;
-            img.style.display = 'block';
-            loading.style.display = 'none';
-            m.style.display = 'flex';
-        };
-        
-        wechatImage.onerror = function() {
-            // ✅ 方案1：图片加载失败处理
-            loading.innerHTML = '<p style="color:red">微信二维码加载失败，请重试</p>';
-            console.error('微信二维码加载失败，URL:', wechatUrl);
-        };
-        
-        wechatImage.src = wechatUrl;
-        
     } else {
         title.innerText = `支付宝收款码 | 需支付：${total} 元`;
+        img.src = 'https://st396007077.github.io/sqy.github.io/images/ZFB.jpg';
         tip.innerText = '请保存二维码到支付宝扫码完成支付';
-        
-        const alipayImage = new Image();
-        const alipayUrl = 'https://st396007077.github.io/sqy.github.io/images/ZFB.jpg?v=' + Date.now();
-        
-        alipayImage.onload = function() {
-            img.src = this.src;
-            img.style.display = 'block';
-            loading.style.display = 'none';
-            m.style.display = 'flex';
-        };
-        
-        alipayImage.onerror = function() {
-            loading.innerHTML = '<p style="color:red">支付宝二维码加载失败，请重试</p>';
-            console.error('支付宝二维码加载失败，URL:', alipayUrl);
-        };
-        
-        alipayImage.src = alipayUrl;
     }
-    
+    m.style.display = 'flex';
     saveFormData();
 }
 
