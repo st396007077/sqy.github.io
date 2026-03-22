@@ -480,7 +480,7 @@ function resetSearch() {
   renderTable();
 }
 
-// 修复：导出Excel 去重重复字段，优化格式，增加加载提示
+// 修复：导出Excel 去除付款截图链接列，其余功能不变
 function exportExcel() {
   if(!filteredOrderData.length) { 
     showModal('提示','暂无数据可导出'); 
@@ -517,18 +517,13 @@ function exportExcel() {
         ? o.paymentRecords.map((r,i)=>`第${i+1}笔：${r.payType} ${r.amount}元 ${r.time}`).join('\n')
         : '-';
 
-      // 付款截图链接：多张用 \n 换行
-      const screenshotUrls = o.payScreenshots?.length
-        ? o.payScreenshots.join('\n')
-        : '无截图';
-
       return {
         '订单ID': o.orderId || '-',
         '姓名': o.userName || '-',
         '电话': o.userPhone || '-',
         '支付方式': o.payType || '-',
         '支付记录': payRecords,
-        '付款截图链接': screenshotUrls,
+        // 已删除：付款截图链接列
         '总金额': `${o.total || 0}元`,
         '提交时间': o.createTime || '-',
         '4月11日早送': getInfo('4月11日早送'),
@@ -561,14 +556,13 @@ function exportExcel() {
       }
     }
 
-    // 调整列宽
+    // 调整列宽（移除付款截图链接列的宽度配置）
     ws['!cols'] = [
       {wch: 15}, // 订单ID
       {wch: 10}, // 姓名
       {wch: 15}, // 电话
       {wch: 12}, // 支付方式
       {wch: 30}, // 支付记录
-      {wch: 40}, // 付款截图链接
       {wch: 10}, // 总金额
       {wch: 20}, // 提交时间
       {wch: 18}, // 4月11日早送
