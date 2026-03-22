@@ -197,6 +197,15 @@ const SERVER_URL = "https://zikaocar-server.onrender.com";
 let ADMIN_PWD = "";
 let originalOrderData = [], mergedOrderData = [], filteredOrderData = [];
 
+// 🔴【修复问题1】实时计算总金额工具函数
+function calculateRealTotal(carList) {
+  let total = 0;
+  (carList || []).forEach(item => {
+    total += Number(item.price) || 0;
+  });
+  return total;
+}
+
 function showLoading(text = "处理中...") {
   document.getElementById('loading').innerText = text;
   document.getElementById('loading').style.display = 'block';
@@ -247,7 +256,7 @@ function mergeCarLists(oldList, newList) {
   return FIXED_CAR_ORDER.filter(n => carMap.has(n)).map(n => carMap.get(n));
 }
 
-// 🔴【修复问题2+3】修正合并函数的状态字段赋值
+// 🔴【修复问题3】正确继承手动修改标记
 function mergeOrders(orders) {
   const mergedMap = new Map();
   orders.forEach(order => {
@@ -269,13 +278,12 @@ function mergeOrders(orders) {
       mergedMap.set(key, {
         ...existing,
         orderId: existing.orderId + ',' + order.orderId,
-        total: order.total || existing.total,
+        total: calculateRealTotal(mergedCarList),
         createTime: order.createTime || existing.createTime,
         carList: mergedCarList,
         payType: order.payType || existing.payType,
         paymentRecords: [].concat(existing.paymentRecords || [], order.paymentRecords || []),
         payScreenshots: [].concat(existing.payScreenshots || [], order.payScreenshots || []),
-        // 🔴 关键修复：继承状态标记
         isMultiSubmit: true,
         isManuallyModified: existing.isManuallyModified || order.isManuallyModified || false
       });
@@ -331,8 +339,10 @@ function renderTable() {
       orderId: '',userName: '',userPhone: '',payType: '',paymentRecords: [],payScreenshots: [],
       total: 0,createTime: '',carList: [],isManuallyModified: false,isMultiSubmit: false,_id: '',...order
     };
+    // 实时计算正确总金额
+    order.total = calculateRealTotal(order.carList);
+    
     const tr = document.createElement('tr');
-    // 颜色渲染逻辑（正常生效）
     if (order.isManuallyModified) {
       tr.className = 'row-modify';
     } else if (order.isMultiSubmit) {
@@ -417,7 +427,6 @@ function resetSearch() {
   renderTable();
 }
 
-// 导出Excel（状态正常显示）
 function exportExcel() {
   if(!filteredOrderData.length) { showModal('提示','暂无数据'); return; }
   showLoading("生成Excel中...");
@@ -427,19 +436,20 @@ function exportExcel() {
         orderId: '',userName: '',userPhone: '',payType: '',paymentRecords: [],payScreenshots: [],
         total: 0,createTime: '',carList: [],isMultiSubmit: false,isManuallyModified: false,...o
       };
+      const realTotal = calculateRealTotal(o.carList);
       const getInfo = (n) => {
         const i = o.carList.find(x => x.name === n);
         return i ? (i.school || (i.from+'→'+i.to) || '-') : '-';
       };
       const payRecords = o.paymentRecords?.length ? o.paymentRecords.map((r,i)=>`第${i+1}笔：${r.payType} ${r.amount}元 ${r.time}`).join('\n') : '-';
-      // 🔴 状态判断正常生效
+      
       let orderStatus = "首次提交";
       if (o.isManuallyModified) orderStatus = "手动修改";
       else if (o.isMultiSubmit) orderStatus = "多次提交";
 
       return {
         '订单ID': o.orderId, '姓名': o.userName, '电话': o.userPhone, '支付方式': o.payType,
-        '支付记录': payRecords, '总金额': `${o.total}元`, '提交时间': o.createTime,
+        '支付记录': payRecords, '总金额': `${realTotal}元`, '提交时间': o.createTime,
         '4月11日早送': getInfo('4月11日早送'), '4月11日晚接': getInfo('4月11日晚接'),
         '4月12日早送': getInfo('4月12日早送'), '4月12日晚接': getInfo('4月12日晚接'),
         '4月11日中午': getInfo('4月11日中午考点更换'), '4月12日中午': getInfo('4月12日中午考点更换'),
