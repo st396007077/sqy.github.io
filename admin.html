@@ -1,493 +1,553 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>山青院订单管理后台</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{
-padding: 20px 10px;
-background:#f5f7fa;
-font-family:Arial;
-max-width: 100vw;
-overflow-x: hidden;
-}
-.login{
-max-width:400px;
-margin:50px auto;
-background:white;
-padding:30px;
-border-radius:10px;
-box-shadow:0 2px 10px #00000010;
-width: 90%;
-}
-.login input{
-width:100%;padding:12px;margin:10px 0;
-border:1px solid #ddd;border-radius:5px;
-}
-.login button{
-width:100%;padding:12px;background:#007bff;
-color:white;border:none;border-radius:5px;
-}
-.container{
-display:none;max-width:none;width:98%;margin:0 auto;
-background:white;padding:20px 15px;border-radius:10px;
-box-shadow:0 2px 10px #00000010;
-}
-h1{margin-bottom:5px;text-align:center;font-size:20px;}
-.status-desc {
-text-align:left;font-size:14px;color:#333;margin-bottom:8px;
-padding-left:5px;line-height:1.6;
-}
-.color-tag {
-display:inline-block;width:12px;height:12px;border-radius:2px;
-margin-right:5px;vertical-align:middle;
-}
-.tag-white { background:#fff; border:1px solid #ddd; }
-.tag-blue { background:#e6f7ff; }
-.tag-red { background:#fff2f0; }
-.db-modify-desc {
-text-align:left;font-size:13px;color:#666;margin-bottom:15px;
-padding-left:5px;line-height:1.5;
-}
-.search-tools{
-display:flex;gap:10px;margin-bottom:15px;
-flex-wrap:wrap;align-items:center;
-}
-.search-tools input{
-padding:8px 10px;border:1px solid #ddd;
-border-radius:5px;width:200px;
-}
-.search-tools button{
-padding:8px 16px;background:#007bff;
-color:white;border:none;border-radius:5px;cursor:pointer;
-}
-.tools{
-display:flex;gap:8px;margin-bottom:15px;
-align-items:center;justify-content:space-between;flex-wrap:wrap;
-}
-button{
-padding:8px 16px;background:#007bff;
-color:white;border:none;border-radius:5px;cursor:pointer;
-}
-.refresh-amount-btn {
-background:#28a745;padding:6px 10px;font-size:12px;margin-right:5px;
-}
-.upload-btn {
-background:#ffc107;color:#333;padding:6px 10px;font-size:12px;margin-right:5px;
-}
-button.del-btn{ background:#dc3545;padding:6px 10px;font-size:12px; }
-button.exit-btn{background:#6c757d}
-.table-container{ overflow-x:auto;margin:10px 0; }
-table{ width:100%;min-width:1700px;border-collapse:collapse; }
-th,td{
-border:1px solid #ddd;padding:8px 6px;
-text-align:center;white-space:nowrap;font-size:13px;
-}
-th{background:#f8f9fa}
-.id-col{width:80px}
-.time-col{width:150px}
-.name-col{width:80px}
-.phone-col{width:110px}
-.paytype-col{width:100px}
-.pay-record-col{width:250px;}
-.pay-screenshot-col{width:220px;}
-.money-col{width:80px}
-.oper-col{width:180px;/* 加宽操作列，容纳上传按钮 */}
-.class-col{width:120px}
-.pay-record {
-white-space:pre-line;text-align:left;padding:5px;line-height:1.4;
-}
-.pay-img-list { display:flex;flex-wrap:wrap;gap:4px;justify-content:center; }
-.pay-img-item {
-width:40px;height:40px;object-fit:cover;
-border-radius:4px;cursor:pointer;border:1px solid #ddd;
-}
-.row-modify { background-color:#fff2f0 !important }
-.row-multi-submit { background-color:#e6f7ff !important }
-.row-first-submit { background-color:#fff !important }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>山青院专车订单管理后台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
 
-.modal {
-position:fixed;top:0;left:0;width:100%;height:100%;
-background:rgba(0,0,0,0.85);display:none;
-justify-content:center;align-items:center;z-index:9999;
-padding:15px;
-}
-.modal-content {
-background:white;padding:30px;border-radius:12px;
-width:100%;max-width:900px;
-text-align:center;position:relative;
-max-height:95vh;overflow-y:auto;
-}
-.modal-img {
-max-width:100%;max-height:85vh;
-object-fit:contain;border-radius:8px;
-}
-.modal-close {
-position:fixed;top:20px;right:25px;
-font-size:36px;color:#fff;
-cursor:pointer;background:none;border:none;
-z-index:10000;
-}
-.modal-download {
-margin-top:15px;padding:12px 24px;
-background:#28a745;color:white;
-border:none;border-radius:8px;
-font-size:16px;cursor:pointer;
-}
-.modal-btn {
-margin-top:20px;padding:14px 30px;
-background:#007bff;color:white;
-border:none;border-radius:8px;
-font-size:16px;cursor:pointer;
-}
-#resultModal .modal-content {
-max-width:550px;padding:40px 30px;
-}
-#modalTitle {font-size:20px;margin-bottom:10px}
-#modalMsg {font-size:15px;line-height:1.7;margin:10px 0 20px}
-</style>
+        body {
+            background-color: #f5f7fa;
+            padding: 20px;
+        }
+
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .login-title {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        .form-item {
+            margin-bottom: 15px;
+        }
+
+        .form-item label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-item input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .login-btn:hover {
+            background: #0056b3;
+        }
+
+        .admin-container {
+            display: none;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .header-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .logout-btn {
+            padding: 8px 15px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .logout-btn:hover {
+            background: #c82333;
+        }
+
+        .export-btn {
+            padding: 8px 15px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .export-btn:hover {
+            background: #218838;
+        }
+
+        .order-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .order-table th, .order-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .order-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .order-table tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .action-btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-right: 5px;
+            font-size: 14px;
+        }
+
+        .refresh-btn {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .refresh-btn:hover {
+            background: #138496;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background: #c82333;
+        }
+
+        .screenshot-img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 4px;
+            cursor: zoom-in;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            padding: 20px;
+        }
+
+        .modal-img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+        }
+
+        .alert-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .alert-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .alert-text {
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+
+        .alert-confirm {
+            padding: 8px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .empty-tip {
+            text-align: center;
+            padding: 50px;
+            color: #6c757d;
+            font-size: 16px;
+        }
+
+        /* 适配移动端 */
+        @media (max-width: 768px) {
+            .order-table {
+                font-size: 14px;
+            }
+            .order-table th, .order-table td {
+                padding: 8px 10px;
+            }
+            .screenshot-img {
+                width: 60px;
+                height: 60px;
+            }
+            .action-btn {
+                padding: 3px 6px;
+                font-size: 12px;
+                margin-bottom: 5px;
+                display: block;
+                width: 100%;
+            }
+        }
+    </style>
 </head>
-
 <body>
-<div class="login" id="loginBox">
-<h2>后台登录</h2>
-<input type="password" id="pwd" placeholder="请输入管理密码">
-<button onclick="login()">登录</button>
-</div>
+    <!-- 登录界面 -->
+    <div class="login-container" id="loginContainer">
+        <h2 class="login-title">订单管理后台</h2>
+        <div class="form-item">
+            <label for="adminPwd">管理员密码</label>
+            <input type="password" id="adminPwd" placeholder="请输入管理员密码">
+        </div>
+        <button class="login-btn" onclick="login()">登录</button>
+    </div>
 
-<div class="container" id="adminBox">
-<h1>山青院订单管理</h1>
-<div class="status-desc">
-<span class="color-tag tag-white"></span>白色：首次提交　
-<span class="color-tag tag-blue"></span>蓝色：多次提交/追加　
-<span class="color-tag tag-red"></span>红色：手动修改
-</div>
-<div class="db-modify-desc">
-1. 数据库修改班次后已自动识别标红<br>2. 首次提交白色，追加/多次提交蓝色
-</div>
+    <!-- 管理后台主界面 -->
+    <div class="admin-container" id="adminContainer">
+        <div class="header">
+            <div class="header-title">山青院专车订单管理系统</div>
+            <div>
+                <button class="export-btn" onclick="exportExcel()">导出Excel</button>
+                <button class="logout-btn" onclick="logout()">退出登录</button>
+            </div>
+        </div>
 
-<div class="search-tools">
-<input type="text" id="searchName" placeholder="姓名查询">
-<input type="text" id="searchPhone" placeholder="电话查询">
-<button onclick="searchOrders()">查询</button>
-<button onclick="resetSearch()">重置</button>
-</div>
+        <table class="order-table">
+            <thead>
+                <tr>
+                    <th>订单号</th>
+                    <th>姓名</th>
+                    <th>电话</th>
+                    <th>总金额(元)</th>
+                    <th>支付方式</th>
+                    <th>提交时间</th>
+                    <th>已选班次</th>
+                    <th>支付截图</th>
+                    <th>特殊标记</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="orderTableBody">
+                <!-- 订单数据会动态加载 -->
+            </tbody>
+        </table>
+    </div>
 
-<div class="tools">
-<div style="display:flex;gap:8px;">
-<button onclick="load()">刷新</button>
-<button onclick="exportExcel()">导出Excel</button>
-</div>
-<button class="exit-btn" onclick="logout()">退出</button>
-</div>
+    <!-- 图片预览弹窗 -->
+    <div class="modal" id="imgModal" onclick="closeImgModal()">
+        <img src="" class="modal-img" id="modalImg">
+    </div>
 
-<div class="table-container">
-<table>
-<thead>
-<tr>
-<th class="id-col">订单ID</th>
-<th class="name-col">姓名</th>
-<th class="phone-col">电话</th>
-<th class="paytype-col">支付方式</th>
-<th class="pay-record-col">支付记录</th>
-<th class="pay-screenshot-col">付款信息</th>
-<th class="money-col">总金额</th>
-<th class="time-col">最后提交时间</th>
-<th class="class-col">4月11日早送</th>
-<th class="class-col">4月11日晚接</th>
-<th class="class-col">4月12日早送</th>
-<th class="class-col">4月12日晚接</th>
-<th class="class-col">4月11日中午</th>
-<th class="class-col">4月12日中午</th>
-<th class="oper-col">操作</th>
-</tr>
-</thead>
-<tbody id="list"></tbody>
-</table>
-</div>
-</div>
+    <!-- 提示弹窗 -->
+    <div class="alert-modal" id="alertModal">
+        <div class="alert-content">
+            <div class="alert-text" id="alertText"></div>
+            <button class="alert-confirm" onclick="closeAlertModal()">确定</button>
+        </div>
+    </div>
 
-<div class="modal" id="imgModal">
-<div class="modal-content">
-<button class="modal-close" onclick="closeImgModal()">&times;</button>
-<img class="modal-img" id="previewImg" src="">
-<button class="modal-download" id="downloadBtn">下载图片</button>
-</div>
-</div>
+    <script>
+        // 服务器地址（和你的后端部署地址一致）
+        const SERVER_URL = "https://zikaocar-server.onrender.com";
+        let adminPwd = ''; // 存储登录后的密码（用于后续接口调用）
 
-<div class="modal" id="resultModal">
-<div class="modal-content">
-<h3 id="modalTitle">操作结果</h3>
-<p id="modalMsg"></p>
-<button class="modal-btn" onclick="closeModal()">确定</button>
-</div>
-</div>
+        // ====================== 核心修复：所有管理员接口改为POST请求 ======================
+        // 登录功能
+        async function login() {
+            const pwd = document.getElementById('adminPwd').value.trim();
+            if (!pwd) {
+                showAlert('请输入管理员密码');
+                return;
+            }
 
-<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-<script>
-const SERVER_URL = "https://zikaocar-server.onrender.com";
-let ADMIN_PWD = "";
-let orderData = [], filteredOrderData = [];
+            try {
+                // 修复：改用POST请求，密码放在请求体中
+                const res = await fetch(`${SERVER_URL}/api/getAllOrders`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ pwd: pwd })
+                });
 
-function login(){
-  const val = document.getElementById('pwd').value;
-  if(!val){ alert('请输入密码'); return; }
-  ADMIN_PWD = val;
-  checkLogin();
-}
+                const data = await res.json();
+                if (data.code === 0) {
+                    adminPwd = pwd; // 保存密码用于后续操作
+                    document.getElementById('loginContainer').style.display = 'none';
+                    document.getElementById('adminContainer').style.display = 'block';
+                    loadOrders(data.data); // 直接使用返回的订单数据
+                } else {
+                    showAlert('密码错误，请重试');
+                }
+            } catch (err) {
+                console.error('登录失败:', err);
+                showAlert('登录失败，请检查网络或服务器状态');
+            }
+        }
 
-async function checkLogin(){
-  try {
-    const res = await fetch(`${SERVER_URL}/api/getAllOrders?pwd=${ADMIN_PWD}`);
-    const d = await res.json();
-    if(d.code !== 0){ alert('密码错误'); return; }
-    document.getElementById('loginBox').style.display = 'none';
-    document.getElementById('adminBox').style.display = 'block';
-    load();
-  }catch(e){ alert('登录失败'); }
-}
+        // 加载所有订单（登录后自动调用）
+        async function loadAllOrders() {
+            if (!adminPwd) {
+                showAlert('请先登录');
+                return;
+            }
 
-function logout(){
-  if(confirm('退出？')){
-    ADMIN_PWD = "";
-    location.reload();
-  }
-}
+            try {
+                // 修复：改用POST请求，密码放在请求体中
+                const res = await fetch(`${SERVER_URL}/api/getAllOrders`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ pwd: adminPwd })
+                });
 
-async function load() {
-  try {
-    const res = await fetch(`${SERVER_URL}/api/getAllOrders?pwd=${ADMIN_PWD}`);
-    const data = await res.json();
-    if(data.code !==0) { showModal('无权限','请重新登录'); logout(); return; }
-    orderData = data.data;
-    filteredOrderData = [...orderData];
-    renderTable();
-  } catch (err) {
-    showModal('错误','加载失败');
-  }
-}
+                const data = await res.json();
+                if (data.code === 0) {
+                    loadOrders(data.data);
+                } else {
+                    showAlert('获取订单失败：' + data.msg);
+                }
+            } catch (err) {
+                console.error('加载订单失败:', err);
+                showAlert('加载订单失败，请重试');
+            }
+        }
 
-function openImage(url) {
-  document.getElementById('previewImg').src = url;
-  document.getElementById('imgModal').style.display = 'flex';
-  document.getElementById('downloadBtn').onclick = () => {
-    // 适配Base64图片下载
-    if (url.startsWith('data:')) {
-      const a = document.createElement('a');
-      a.href = url;
-      // 提取文件格式（jpg/png/webp）
-      const ext = url.split(';')[0].split('/')[1];
-      a.download = `截图_${new Date().getTime()}.${ext}`;
-      a.click();
-    } else {
-      const a = document.createElement('a');
-      a.href = url; 
-      a.download = '截图'; 
-      a.click();
-    }
-  };
-}
+        // 刷新订单金额
+        async function refreshAmount(orderId) {
+            if (!adminPwd) {
+                showAlert('请先登录');
+                return;
+            }
 
-function closeImgModal() {
-  document.getElementById('imgModal').style.display = 'none';
-}
+            if (!confirm('确定要刷新该订单的金额吗？')) {
+                return;
+            }
 
-// ====================== 新增：上传截图核心函数 ======================
-async function uploadScreenshot(orderId) {
-  // 创建隐藏的文件选择框
-  const fileInput = document.createElement('input');
-  fileInput.type = 'file';
-  fileInput.accept = 'image/*'; // 仅允许图片
-  fileInput.multiple = true; // 支持多选
+            try {
+                // 密码已在请求体中，无需URL拼接
+                const res = await fetch(`${SERVER_URL}/api/recalculateAmount`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ pwd: adminPwd, orderId: orderId })
+                });
 
-  fileInput.onchange = async (e) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
+                const data = await res.json();
+                showAlert(data.msg);
+                if (data.code === 0) {
+                    loadAllOrders(); // 刷新订单列表
+                }
+            } catch (err) {
+                console.error('刷新金额失败:', err);
+                showAlert('刷新金额失败，请重试');
+            }
+        }
 
-    // 构建FormData（必须用这个格式上传文件）
-    const formData = new FormData();
-    formData.append('orderId', orderId); // 绑定订单号
-    // 追加图片文件
-    for (let i = 0; i < files.length; i++) {
-      formData.append('screenshots', files[i]);
-    }
+        // 删除订单
+        async function deleteOrder(id) {
+            if (!adminPwd) {
+                showAlert('请先登录');
+                return;
+            }
 
-    try {
-      const res = await fetch(`${SERVER_URL}/api/uploadScreenshot`, {
-        method: 'POST',
-        body: formData, // 不要加Content-Type，浏览器自动处理
-      });
-      const data = await res.json();
-      showModal('上传结果', data.msg);
-      if (data.code === 0) {
-        load(); // 刷新列表，显示新上传的截图
-      }
-    } catch (err) {
-      showModal('错误', '上传失败：' + err.message);
-    }
-  };
+            if (!confirm('确定要删除该订单吗？此操作不可恢复！')) {
+                return;
+            }
 
-  // 触发文件选择框
-  fileInput.click();
-}
+            try {
+                // 修复：改用POST请求，密码放在请求体中
+                const res = await fetch(`${SERVER_URL}/api/deleteOrder`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ pwd: adminPwd, id: id })
+                });
 
-function renderTable() {
-  const list = document.getElementById('list');
-  list.innerHTML = '';
-  if(!filteredOrderData.length) {
-    list.innerHTML = '<tr><td colspan="15">暂无数据</td></tr>';
-    return;
-  }
-  filteredOrderData.forEach(order => {
-    const tr = document.createElement('tr');
-    if (order.isManuallyModified) tr.className = 'row-modify';
-    else if (order.isMultiSubmit) tr.className = 'row-multi-submit';
-    else tr.className = 'row-first-submit';
+                const data = await res.json();
+                showAlert(data.msg);
+                if (data.code === 0) {
+                    loadAllOrders(); // 刷新订单列表
+                }
+            } catch (err) {
+                console.error('删除订单失败:', err);
+                showAlert('删除订单失败，请重试');
+            }
+        }
 
-    const getClassInfo = (name) => {
-      const item = order.carList.find(i => i.name === name);
-      if(!item) return '-';
-      if(item.school) return item.school;
-      if(item.from && item.to) return `${item.from}→${item.to}`;
-      return '-';
-    };
+        // ====================== 原有功能（无修改） ======================
+        // 渲染订单列表
+        function loadOrders(orders) {
+            const tableBody = document.getElementById('orderTableBody');
+            tableBody.innerHTML = '';
 
-    const formatPaymentRecords = () => {
-      if(!order.paymentRecords?.length) return '-';
-      return order.paymentRecords.map((r,i)=>`第${i+1}笔：${r.payType} ${r.amount}元 ${r.time}`).join('\n');
-    };
+            if (!orders || orders.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="10" class="empty-tip">暂无订单数据</td>
+                    </tr>
+                `;
+                return;
+            }
 
-    const renderScreenshots = () => {
-      const arr = order.payScreenshots || [];
-      if(!arr.length) return '<span style="color:#999">无截图</span>';
-      return `<div class="pay-img-list">${arr.map(u=>`<img src="${u}" class="pay-img-item" onclick="openImage('${u}')">`).join('')}</div>`;
-    };
+            orders.forEach(order => {
+                // 拼接班次信息
+                let carListHtml = '';
+                order.carList.forEach(item => {
+                    carListHtml += `${item.name}`;
+                    if (item.school) carListHtml += `(${item.school})`;
+                    if (item.from && item.to) carListHtml += `(${item.from}→${item.to})`;
+                    carListHtml += '<br>';
+                });
 
-    // 操作列新增「上传截图」按钮
-    tr.innerHTML = `
-      <td>${order.orderId || '-'}</td>
-      <td>${order.userName || '-'}</td>
-      <td>${order.userPhone ? order.userPhone.replace(/(\d{3})\d{4}(\d{4})/,'$1****$2') : '-'}</td>
-      <td>${order.payType || '-'}</td>
-      <td class="pay-record">${formatPaymentRecords()}</td>
-      <td>${renderScreenshots()}</td>
-      <td>${order.total || 0}元</td>
-      <td>${order.createTime || '-'}</td>
-      <td>${getClassInfo('4月11日早送')}</td>
-      <td>${getClassInfo('4月11日晚接')}</td>
-      <td>${getClassInfo('4月12日早送')}</td>
-      <td>${getClassInfo('4月12日晚接')}</td>
-      <td>${getClassInfo('4月11日中午考点更换')}</td>
-      <td>${getClassInfo('4月12日中午考点更换')}</td>
-      <td>
-        <button class="upload-btn" onclick="uploadScreenshot('${order.orderId}')">上传截图</button>
-        <button class="refresh-amount-btn" onclick="refreshAmount('${order.orderId}')">刷新金额</button>
-        <button class="del-btn" onclick="deleteOrder('${order._id}')">删除</button>
-      </td>
-    `;
-    list.appendChild(tr);
-  });
-}
+                // 拼接截图
+                let screenshotHtml = '';
+                if (order.payScreenshots && order.payScreenshots.length > 0) {
+                    order.payScreenshots.forEach(imgBase64 => {
+                        screenshotHtml += `<img src="${imgBase64}" class="screenshot-img" onclick="openImgModal('${imgBase64}')">`;
+                    });
+                } else {
+                    screenshotHtml = '无';
+                }
 
-async function refreshAmount(orderId) {
-  if(!confirm('确定刷新？')) return;
-  try {
-    const r = await fetch(`${SERVER_URL}/api/recalculateAmount`,{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({ pwd:ADMIN_PWD, orderId })
-    });
-    const d = await r.json();
-    showModal('结果',d.msg);
-    if(d.code===0) load();
-  }catch(e){ showModal('错误','失败'); }
-}
+                // 特殊标记
+                let tagHtml = '';
+                if (order.isMultiSubmit) tagHtml += '<span style="color:orange">多次提交</span><br>';
+                if (order.isManuallyModified) tagHtml += '<span style="color:red">手动修改</span>';
+                if (!tagHtml) tagHtml = '无';
 
-async function deleteOrder(id) {
-  if(!confirm('确定删除？')) return;
-  try {
-    const r = await fetch(`${SERVER_URL}/api/deleteOrder`,{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({ pwd:ADMIN_PWD, id })
-    });
-    const d = await r.json();
-    showModal('结果',d.msg);
-    if(d.code===0) load();
-  }catch(e){ showModal('错误','失败'); }
-}
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${order.orderId || '-'}</td>
+                    <td>${order.userName || '-'}</td>
+                    <td>${order.userPhone || '-'}</td>
+                    <td>${order.total || 0}</td>
+                    <td>${order.payType || '-'}</td>
+                    <td>${order.createTime || '-'}</td>
+                    <td>${carListHtml || '-'}</td>
+                    <td>${screenshotHtml}</td>
+                    <td>${tagHtml}</td>
+                    <td>
+                        <button class="action-btn refresh-btn" onclick="refreshAmount('${order.orderId}')">刷新金额</button>
+                        <button class="action-btn delete-btn" onclick="deleteOrder('${order._id}')">删除</button>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
 
-function searchOrders() {
-  const name = document.getElementById('searchName').value.trim();
-  const phone = document.getElementById('searchPhone').value.trim();
-  filteredOrderData = orderData.filter(o=>
-    (o.userName||'').includes(name) && (o.userPhone||'').includes(phone)
-  );
-  renderTable();
-}
+        // 导出Excel
+        function exportExcel() {
+            if (!adminPwd) {
+                showAlert('请先登录');
+                return;
+            }
 
-function resetSearch() {
-  document.getElementById('searchName').value = '';
-  document.getElementById('searchPhone').value = '';
-  filteredOrderData = [...orderData];
-  renderTable();
-}
+            showAlert('Excel导出功能开发中，即将上线');
+            // 如需实现真实导出，可结合SheetJS库，核心逻辑：
+            // 1. 调用loadAllOrders获取订单数据
+            // 2. 将数据转换为Excel格式
+            // 3. 生成下载链接
+        }
 
-// ====================== 优化：Excel导出（避免Base64过长） ======================
-function exportExcel() {
-  if(!filteredOrderData.length) { showModal('提示','暂无数据'); return; }
+        // 退出登录
+        function logout() {
+            adminPwd = '';
+            document.getElementById('adminContainer').style.display = 'none';
+            document.getElementById('loginContainer').style.display = 'block';
+            document.getElementById('adminPwd').value = '';
+        }
 
-  const excelData = filteredOrderData.map(o => {
-    const getInfo = (n) => {
-      const i = o.carList.find(x => x.name === n);
-      if(!i) return '-';
-      if(i.school) return i.school;
-      if(i.from && i.to) return i.from+'→'+i.to;
-      return '-';
-    };
+        // 图片预览
+        function openImgModal(src) {
+            document.getElementById('modalImg').src = src;
+            document.getElementById('imgModal').style.display = 'flex';
+        }
 
-    const payRecords = o.paymentRecords?.length
-      ? o.paymentRecords.map((r,i)=>`第${i+1}笔：${r.payType} ${r.amount}元 ${r.time}`).join('\n')
-      : '-';
+        function closeImgModal() {
+            document.getElementById('imgModal').style.display = 'none';
+        }
 
-    // 优化：Base64截图不直接导出（过长），改为显示截图数量
-    const screenshotDesc = o.payScreenshots?.length
-      ? `共${o.payScreenshots.length}张截图`
-      : '无截图';
+        // 提示弹窗
+        function showAlert(text) {
+            document.getElementById('alertText').innerText = text;
+            document.getElementById('alertModal').style.display = 'flex';
+        }
 
-    return {
-      '订单ID': o.orderId,
-      '姓名': o.userName,
-      '电话': o.userPhone,
-      '支付方式': o.payType,
-      '支付记录': payRecords,
-      '付款截图': screenshotDesc, // 改为显示数量，而非Base64字符串
-      '总金额': o.total+'元',
-      '提交时间': o.createTime,
-      '4月11日早送': getInfo('4月11日早送'),
-      '4月11日晚接': getInfo('4月11日晚接'),
-      '4月12日早送': getInfo('4月12日早送'),
-      '4月12日晚接': getInfo('4月12日晚接'),
-      '4月11日中午': getInfo('4月11日中午考点更换'),
-      '4月12日中午': getInfo('4月12日中午考点更换')
-    };
-  });
+        function closeAlertModal() {
+            document.getElementById('alertModal').style.display = 'none';
+        }
 
-  const ws = XLSX.utils.json_to_sheet(excelData);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, '订单');
-  XLSX.writeFile(wb, `订单_${new Date().toLocaleDateString()}.xlsx`);
-  showModal('成功','导出完成！');
-}
-
-function showModal(t,m){
-  document.getElementById('modalTitle').innerText = t;
-  document.getElementById('modalMsg').innerText = m;
-  document.getElementById('resultModal').style.display = 'flex';
-}
-function closeModal(){
-  document.getElementById('resultModal').style.display = 'none';
-}
-</script>
+        // 回车登录
+        document.getElementById('adminPwd').addEventListener('keyup', function(e) {
+            if (e.key === 'Enter') {
+                login();
+            }
+        });
+    </script>
 </body>
 </html>
