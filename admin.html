@@ -345,7 +345,7 @@ async function load() {
           new Date(b.createTime) - new Date(a.createTime)
         )[0];
         
-        const mergedCarList = mergeCarLists([], orders.flatMap(o => o.carList || []));
+        const mergedCarList = mergeCarLists([], orders.flatMap(o => o.carList || []);
         
         // ✅ 修复：检查是否任何一个订单被手动修改过
         const hasManualModification = orders.some(o => o.isManuallyModified);
@@ -545,7 +545,7 @@ async function refreshAmount(orderId) {
   if(!confirm('确定刷新金额？')) return;
   showLoading("刷新中...");
   try {
-    const r = await fetch(`${SERVERVER_URL}/api/recalculateAmount`,{
+    const r = await fetch(`${SERVER_URL}/api/recalculateAmount`,{
       method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ pwd:ADMIN_PWD, orderId })
     });
     const d = await r.json();
