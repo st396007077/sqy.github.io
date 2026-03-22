@@ -292,50 +292,6 @@ function mergeCarLists(oldList, newList) {
   return FIXED_CAR_ORDER.filter(n => carMap.has(n)).map(n => carMap.get(n));
 }
 
-// 正确继承手动修改标记
-function mergeOrders(orders) {
-  const mergedMap = new Map();
-  orders.forEach(order => {
-    const key = `${order.userName || ''}_${order.userPhone || ''}`;
-    if (!key) {
-      mergedMap.set(`empty_${order._id}`, {
-        ...order,
-        paymentRecords: [].concat(order.paymentRecords || []),
-        payScreenshots: [].concat(order.payScreenshots || []),
-        isMultiSubmit: order.isMultiSubmit || false,
-        isManuallyModified: order.isManuallyModified || false,
-        createTime: order.createTime
-      });
-      return;
-    }
-    if (mergedMap.has(key)) {
-      const existing = mergedMap.get(key);
-      const mergedCarList = mergeCarLists(existing.carList || [], order.carList || []);
-      mergedMap.set(key, {
-        ...existing,
-        orderId: existing.orderId + ',' + order.orderId,
-        total: calculateRealTotal(mergedCarList),
-        createTime: order.createTime || existing.createTime,
-        carList: mergedCarList,
-        payType: order.payType || existing.payType,
-        paymentRecords: [].concat(existing.paymentRecords || [], order.paymentRecords || []),
-        payScreenshots: [].concat(existing.payScreenshots || [], order.payScreenshots || []),
-        isMultiSubmit: true,
-        isManuallyModified: existing.isManuallyModified || order.isManuallyModified || false
-      });
-    } else {
-      mergedMap.set(key, {
-        ...order,
-        paymentRecords: [].concat(order.paymentRecords || []),
-        payScreenshots: [].concat(order.payScreenshots || []),
-        isMultiSubmit: order.isMultiSubmit || false,
-        isManuallyModified: order.isManuallyModified || false
-      });
-    }
-  });
-  return Array.from(mergedMap.values());
-}
-
 async function load() {
   if (!ADMIN_PWD) { showModal("提示", "请先登录"); logout(); return; }
   showLoading("加载订单数据中...");
@@ -347,8 +303,70 @@ async function load() {
     const data = await res.json();
     hideLoading();
     if(data.code !==0) { showModal('无权限','请重新登录'); logout(); return; }
+    
+    // ✅ 修复：保存原始订单数据
     originalOrderData = data.data;
-    mergedOrderData = mergeOrders(originalOrderData);
+    
+    // ✅ 修复：使用新的合并逻辑
+    const userOrdersMap = new Map();
+    
+    // 按用户分组
+    originalOrderData.forEach(order => {
+      const key = `${order.userName || ''}_${order.userPhone || ''}`;
+      if (!key) {
+        // 单独处理
+        if (!userOrdersMap.has(`single_${order._id}`)) {
+          userOrdersMap.set(`single_${order._id}`, [order]);
+        }
+        return;
+      }
+      
+      if (!userOrdersMap.has(key)) {
+        userOrdersMap.set(key, [order]);
+      } else {
+        userOrdersMap.get(key).push(order);
+      }
+    });
+    
+    // 合并同一用户的订单
+    mergedOrderData = [];
+    
+    userOrdersMap.forEach((orders, key) => {
+      if (orders.length === 1) {
+        // 单个订单，直接使用
+        mergedOrderData.push({
+          ...orders[0],
+          _id: orders[0]._id, // 保持原始ID
+          isManuallyModified: orders[0].isManuallyModified || false
+        });
+      } else {
+        // 合并多个订单
+        const latestOrder = orders.sort((a, b) => 
+          new Date(b.createTime) - new Date(a.createTime)
+        )[0];
+        
+        const mergedCarList = mergeCarLists([], orders.flatMap(o => o.carList || []));
+        
+        // ✅ 修复：检查是否任何一个订单被手动修改过
+        const hasManualModification = orders.some(o => o.isManuallyModified);
+        
+        mergedOrderData.push({
+          _id: latestOrder._id, // 使用最新订单的ID
+          orderId: orders.map(o => o.orderId).join(','),
+          userName: latestOrder.userName,
+          userPhone: latestOrder.userPhone,
+          payType: latestOrder.payType,
+          total: calculateRealTotal(mergedCarList),
+          carList: mergedCarList,
+          createTime: latestOrder.createTime,
+          paymentRecords: orders.flatMap(o => o.paymentRecords || []),
+          payScreenshots: orders.flatMap(o => o.payScreenshots || []),
+          isMultiSubmit: orders.length > 1,
+          isManuallyModified: hasManualModification // ✅ 正确判断手动修改状态
+        });
+      }
+    });
+    
     filteredOrderData = [...mergedOrderData];
     renderTable();
   } catch (err) { hideLoading(); showModal('错误','加载失败：网络异常'); }
@@ -370,14 +388,14 @@ function renderTable() {
   const list = document.getElementById('list');
   list.innerHTML = '';
   if(!filteredOrderData.length) { list.innerHTML = '<tr><td colspan="15">暂无数据</td></tr>'; return; }
+  
   filteredOrderData.forEach(order => {
     order = {
       orderId: '',userName: '',userPhone: '',payType: '',paymentRecords: [],payScreenshots: [],
       total: 0,createTime: '',carList: [],isManuallyModified: false,isMultiSubmit: false,_id: '',...order
     };
-    // 实时计算正确总金额
-    order.total = calculateRealTotal(order.carList);
     
+    // 确保每个订单独立判断状态
     const tr = document.createElement('tr');
     if (order.isManuallyModified) {
       tr.className = 'row-modify';
@@ -386,20 +404,24 @@ function renderTable() {
     } else {
       tr.className = 'row-first-submit';
     }
+    
     const getClassInfo = (name) => {
       const item = order.carList.find(i => i.name === name);
       if(!item) return '-';
       return item.school || (item.from && item.to ? `${item.from}→${item.to}` : '-');
     };
+    
     const formatPaymentRecords = () => {
       if(!order.paymentRecords?.length) return '-';
       return order.paymentRecords.map((r, i) => `第${i+1}笔：${r.payType || '未知方式'} ${r.amount || 0}元 ${r.time || '未知时间'}`).join('\n');
     };
+    
     const renderScreenshots = () => {
       const arr = order.payScreenshots || [];
       if(!arr.length) return '<span style="color:#999">无截图</span>';
       return `<div class="pay-img-list">${arr.map(u=>`<img src="${u}" class="pay-img-item" onclick="openImage('${u.replace(/'/g, "\\'")}')" alt="截图">`).join('')}</div>`;
     };
+    
     tr.innerHTML = `
      <td>${order.orderId || '-'}</td>
      <td>${order.userName || '-'}</td>
@@ -545,10 +567,18 @@ function exportExcel() {
   showLoading("生成Excel中...");
   try {
     const excelData = filteredOrderData.map(o => {
-      o = {
-        orderId: '',userName: '',userPhone: '',payType: '',paymentRecords: [],payScreenshots: [],
-        total: 0,createTime: '',carList: [],isMultiSubmit: false,isManuallyModified: false,...o
-      };
+      // ✅ 修复：正确获取订单的原始数据来判断状态
+      const originalOrders = originalOrderData.filter(
+        orig => orig.userName === o.userName && orig.userPhone === o.userPhone
+      );
+      
+      let orderStatus = "首次提交";
+      if (originalOrders.some(orig => orig.isManuallyModified)) {
+        orderStatus = "手动修改";
+      } else if (o.isMultiSubmit) {
+        orderStatus = "多次提交";
+      }
+      
       const realTotal = calculateRealTotal(o.carList);
       const getInfo = (n) => {
         const i = o.carList.find(x => x.name === n);
@@ -556,10 +586,6 @@ function exportExcel() {
       };
       const payRecords = o.paymentRecords?.length ? o.paymentRecords.map((r,i)=>`第${i+1}笔：${r.payType} ${r.amount}元 ${r.time}`).join('\n') : '-';
       
-      let orderStatus = "首次提交";
-      if (o.isManuallyModified) orderStatus = "手动修改";
-      else if (o.isMultiSubmit) orderStatus = "多次提交";
-
       return {
         '订单ID': o.orderId, '姓名': o.userName, '电话': o.userPhone, '支付方式': o.payType,
         '支付记录': payRecords, '总金额': `${realTotal}元`, '提交时间': o.createTime,
@@ -569,6 +595,7 @@ function exportExcel() {
         '订单状态': orderStatus
       };
     });
+    
     const ws = XLSX.utils.json_to_sheet(excelData);
     const range = XLSX.utils.decode_range(ws['!ref']);
     const wrapStyle = { alignment: { wrapText: true, vertical: 'top', horizontal: 'left' } };
