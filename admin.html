@@ -74,6 +74,9 @@ color:white;border:none;border-radius:5px;cursor:pointer;
 .refresh-amount-btn {
 background:#28a745;padding:6px 10px;font-size:12px;margin-right:5px;
 }
+.upload-btn {
+background:#ffc107;color:#333;padding:6px 10px;font-size:12px;margin-right:5px;
+}
 button.del-btn{ background:#dc3545;padding:6px 10px;font-size:12px; }
 button.exit-btn{background:#6c757d}
 .table-container{ overflow-x:auto;margin:10px 0; }
@@ -91,7 +94,7 @@ th{background:#f8f9fa}
 .pay-record-col{width:250px;}
 .pay-screenshot-col{width:220px;}
 .money-col{width:80px}
-.oper-col{width:140px}
+.oper-col{width:180px;/* 加宽操作列，容纳上传按钮 */}
 .class-col{width:120px}
 .pay-record {
 white-space:pre-line;text-align:left;padding:5px;line-height:1.4;
@@ -270,12 +273,64 @@ function openImage(url) {
   document.getElementById('previewImg').src = url;
   document.getElementById('imgModal').style.display = 'flex';
   document.getElementById('downloadBtn').onclick = () => {
-    const a = document.createElement('a');
-    a.href = url; a.download = '截图'; a.click();
+    // 适配Base64图片下载
+    if (url.startsWith('data:')) {
+      const a = document.createElement('a');
+      a.href = url;
+      // 提取文件格式（jpg/png/webp）
+      const ext = url.split(';')[0].split('/')[1];
+      a.download = `截图_${new Date().getTime()}.${ext}`;
+      a.click();
+    } else {
+      const a = document.createElement('a');
+      a.href = url; 
+      a.download = '截图'; 
+      a.click();
+    }
   };
 }
+
 function closeImgModal() {
   document.getElementById('imgModal').style.display = 'none';
+}
+
+// ====================== 新增：上传截图核心函数 ======================
+async function uploadScreenshot(orderId) {
+  // 创建隐藏的文件选择框
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.accept = 'image/*'; // 仅允许图片
+  fileInput.multiple = true; // 支持多选
+
+  fileInput.onchange = async (e) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    // 构建FormData（必须用这个格式上传文件）
+    const formData = new FormData();
+    formData.append('orderId', orderId); // 绑定订单号
+    // 追加图片文件
+    for (let i = 0; i < files.length; i++) {
+      formData.append('screenshots', files[i]);
+    }
+
+    try {
+      const res = await fetch(`${SERVER_URL}/api/uploadScreenshot`, {
+        method: 'POST',
+        body: formData, // 不要加Content-Type，浏览器自动处理
+      });
+      const data = await res.json();
+      showModal('上传结果', data.msg);
+      if (data.code === 0) {
+        load(); // 刷新列表，显示新上传的截图
+      }
+    } catch (err) {
+      showModal('错误', '上传失败：' + err.message);
+    }
+  };
+
+  // 触发文件选择框
+  fileInput.click();
 }
 
 function renderTable() {
@@ -310,6 +365,7 @@ function renderTable() {
       return `<div class="pay-img-list">${arr.map(u=>`<img src="${u}" class="pay-img-item" onclick="openImage('${u}')">`).join('')}</div>`;
     };
 
+    // 操作列新增「上传截图」按钮
     tr.innerHTML = `
       <td>${order.orderId || '-'}</td>
       <td>${order.userName || '-'}</td>
@@ -326,6 +382,7 @@ function renderTable() {
       <td>${getClassInfo('4月11日中午考点更换')}</td>
       <td>${getClassInfo('4月12日中午考点更换')}</td>
       <td>
+        <button class="upload-btn" onclick="uploadScreenshot('${order.orderId}')">上传截图</button>
         <button class="refresh-amount-btn" onclick="refreshAmount('${order.orderId}')">刷新金额</button>
         <button class="del-btn" onclick="deleteOrder('${order._id}')">删除</button>
       </td>
@@ -376,9 +433,7 @@ function resetSearch() {
   renderTable();
 }
 
-// ======================
-// ✅ 已修复：导出Excel（支持图片URL，不报错）
-// ======================
+// ====================== 优化：Excel导出（避免Base64过长） ======================
 function exportExcel() {
   if(!filteredOrderData.length) { showModal('提示','暂无数据'); return; }
 
@@ -395,9 +450,9 @@ function exportExcel() {
       ? o.paymentRecords.map((r,i)=>`第${i+1}笔：${r.payType} ${r.amount}元 ${r.time}`).join('\n')
       : '-';
 
-    // 图片链接（多张用换行分隔）
-    const screenshotUrls = o.payScreenshots?.length
-      ? o.payScreenshots.join('\n')
+    // 优化：Base64截图不直接导出（过长），改为显示截图数量
+    const screenshotDesc = o.payScreenshots?.length
+      ? `共${o.payScreenshots.length}张截图`
       : '无截图';
 
     return {
@@ -406,7 +461,7 @@ function exportExcel() {
       '电话': o.userPhone,
       '支付方式': o.payType,
       '支付记录': payRecords,
-      '付款截图链接': screenshotUrls,
+      '付款截图': screenshotDesc, // 改为显示数量，而非Base64字符串
       '总金额': o.total+'元',
       '提交时间': o.createTime,
       '4月11日早送': getInfo('4月11日早送'),
