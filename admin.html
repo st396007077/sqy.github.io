@@ -105,7 +105,6 @@ border-radius:4px;cursor:pointer;border:1px solid #ddd;
 .row-multi-submit { background-color:#e6f7ff !important }
 .row-first-submit { background-color:#fff !important }
 
-/* 弹窗优化（大弹窗） */
 .modal {
 position:fixed;top:0;left:0;width:100%;height:100%;
 background:rgba(0,0,0,0.85);display:none;
@@ -146,7 +145,6 @@ max-width:550px;padding:40px 30px;
 #modalTitle {font-size:20px;margin-bottom:10px}
 #modalMsg {font-size:15px;line-height:1.7;margin:10px 0 20px}
 
-/* 新增：加载中样式 */
 .loading {
 position: fixed;
 top: 50%;
@@ -164,7 +162,7 @@ display: none;
 </head>
 
 <body>
-<!-- 新增：加载中提示 -->
+
 <div class="loading" id="loading">处理中...</div>
 
 <div class="login" id="loginBox">
@@ -247,7 +245,6 @@ const SERVER_URL = "https://zikaocar-server.onrender.com";
 let ADMIN_PWD = "";
 let originalOrderData = [], mergedOrderData = [], filteredOrderData = [];
 
-// 新增：显示/隐藏加载中
 function showLoading(text = "处理中...") {
   document.getElementById('loading').innerText = text;
   document.getElementById('loading').style.display = 'block';
@@ -256,7 +253,6 @@ function hideLoading() {
   document.getElementById('loading').style.display = 'none';
 }
 
-// 修复：登录接口改为POST请求（密码放请求体，适配后端安全优化）
 function login(){
   const val = document.getElementById('pwd').value;
   if(!val){ alert('请输入密码'); return; }
@@ -267,7 +263,6 @@ function login(){
 async function checkLogin(){
   showLoading("登录验证中...");
   try {
-    // 修复：改为POST请求，密码放请求体
     const res = await fetch(`${SERVER_URL}/api/getAllOrders`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -295,43 +290,26 @@ function logout(){
   }
 }
 
-// ✅ 核心修改：新增班次合并工具函数
 function mergeCarLists(oldList, newList) {
-  // 1. 原有班次转Map（按名称索引）
   const carMap = new Map();
   oldList.forEach(car => {
-    if (car.name) {
-      carMap.set(car.name, car);
-    }
+    if (car.name) carMap.set(car.name, car);
   });
-
-  // 2. 新班次覆盖同名旧班次，新增班次直接添加
   newList.forEach(car => {
-    if (car.name) {
-      carMap.set(car.name, car);
-    }
+    if (car.name) carMap.set(car.name, car);
   });
-
-  // 3. 按固定顺序排序（和前端一致）
   const FIXED_CAR_ORDER = [
     '4月11日早送','4月11日晚接','4月12日早送','4月12日晚接',
     '4月11日中午考点更换','4月12日中午考点更换'
   ];
-  
-  return FIXED_CAR_ORDER
-    .filter(name => carMap.has(name)) // 只保留已选班次
-    .map(name => carMap.get(name));   // 按固定顺序返回
+  return FIXED_CAR_ORDER.filter(n => carMap.has(n)).map(n => carMap.get(n));
 }
 
-// 核心修改：订单合并逻辑（保留所有班次，不再覆盖）
 function mergeOrders(orders) {
   const mergedMap = new Map();
-  
   orders.forEach(order => {
-    // 以姓名+电话作为唯一标识（忽略空值）
     const key = `${order.userName || ''}_${order.userPhone || ''}`;
     if (!key) {
-      // 无姓名/电话的订单单独处理
       mergedMap.set(`empty_${order._id}`, {
         ...order,
         paymentRecords: [].concat(order.paymentRecords || []),
@@ -341,48 +319,40 @@ function mergeOrders(orders) {
       });
       return;
     }
-
     if (mergedMap.has(key)) {
-      // 已存在该用户，合并数据
       const existing = mergedMap.get(key);
-      // ✅ 关键修改：合并新旧班次列表
       const mergedCarList = mergeCarLists(existing.carList || [], order.carList || []);
-      
       mergedMap.set(key, {
         ...existing,
-        // 保留最后一次的基础信息
-        orderId: existing.orderId + ',' + order.orderId, // 合并订单ID
-        total: order.total || existing.total, // 保留最新金额
-        createTime: order.createTime || existing.createTime, // 最后提交时间
-        carList: mergedCarList, // ✅ 使用合并后的班次列表（不再覆盖）
-        payType: order.payType || existing.payType, // 保留最新支付方式
-        // 合并支付记录（保留所有提交记录）
+        orderId: existing.orderId + ',' + order.orderId,
+        total: order.total || existing.total,
+        createTime: order.createTime || existing.createTime,
+        carList: mergedCarList,
+        payType: order.payType || existing.payType,
         paymentRecords: [].concat(existing.paymentRecords || [], order.paymentRecords || []),
-        // 合并截图
         payScreenshots: [].concat(existing.payScreenshots || [], order.payScreenshots || []),
-        // 标记为多次提交
         isMultiSubmit: true,
-        // 保留手动修改标记（只要有一条是修改的，就标红）
         isManuallyModified: existing.isManuallyModified || order.isManuallyModified
       });
     } else {
-      // 首次出现该用户，初始化
       mergedMap.set(key, {
         ...order,
         paymentRecords: [].concat(order.paymentRecords || []),
         payScreenshots: [].concat(order.payScreenshots || []),
-        isMultiSubmit: false, // 初始为单次提交
+        isMultiSubmit: false,
         isManuallyModified: order.isManuallyModified || false
       });
     }
   });
-
-  // 转换为数组并返回
   return Array.from(mergedMap.values());
 }
 
-// 优化：加载订单增加加载提示，改为POST请求 + 恢复订单合并
 async function load() {
+  if (!ADMIN_PWD) {
+    showModal("提示", "请先登录");
+    logout();
+    return;
+  }
   showLoading("加载订单数据中...");
   try {
     const res = await fetch(`${SERVER_URL}/api/getAllOrders`, {
@@ -397,11 +367,8 @@ async function load() {
       logout(); 
       return; 
     }
-    // 保存原始数据，用于合并
     originalOrderData = data.data;
-    // 合并同用户的多次提交
     mergedOrderData = mergeOrders(originalOrderData);
-    // 初始化筛选数据
     filteredOrderData = [...mergedOrderData];
     renderTable();
   } catch (err) {
@@ -410,7 +377,6 @@ async function load() {
   }
 }
 
-// 优化：图片预览兼容Base64格式，下载功能增强
 function openImage(url) {
   document.getElementById('previewImg').src = url;
   document.getElementById('imgModal').style.display = 'flex';
@@ -418,7 +384,6 @@ function openImage(url) {
     try {
       const a = document.createElement('a');
       a.href = url;
-      // 优化：生成有意义的文件名
       const timestamp = new Date().getTime();
       a.download = `支付截图_${timestamp}.png`;
       document.body.appendChild(a);
@@ -434,7 +399,6 @@ function closeImgModal() {
   document.getElementById('imgModal').style.display = 'none';
 }
 
-// 核心恢复：渲染表格时保留行颜色标记（蓝/红/白）+ 完整支付记录
 function renderTable() {
   const list = document.getElementById('list');
   list.innerHTML = '';
@@ -443,33 +407,19 @@ function renderTable() {
     return;
   }
   filteredOrderData.forEach(order => {
-    // 空值保护：确保order有默认值
     order = {
-      orderId: '',
-      userName: '',
-      userPhone: '',
-      payType: '',
-      paymentRecords: [],
-      payScreenshots: [],
-      total: 0,
-      createTime: '',
-      carList: [],
-      isManuallyModified: false,
-      isMultiSubmit: false,
-      _id: '',
-      ...order
+      orderId: '',userName: '',userPhone: '',payType: '',paymentRecords: [],
+      payScreenshots: [],total: 0,createTime: '',carList: [],
+      isManuallyModified: false,isMultiSubmit: false,_id: '',...order
     };
-
     const tr = document.createElement('tr');
-    // 恢复行颜色逻辑：手动修改(红) > 多次提交(蓝) > 首次提交(白)
     if (order.isManuallyModified) {
-      tr.className = 'row-modify'; // 红色：数据库修改
+      tr.className = 'row-modify';
     } else if (order.isMultiSubmit) {
-      tr.className = 'row-multi-submit'; // 蓝色：多次提交
+      tr.className = 'row-multi-submit';
     } else {
-      tr.className = 'row-first-submit'; // 白色：首次提交
+      tr.className = 'row-first-submit';
     }
-
     const getClassInfo = (name) => {
       const item = order.carList.find(i => i.name === name);
       if(!item) return '-';
@@ -477,25 +427,19 @@ function renderTable() {
       if(item.from && item.to) return `${item.from}→${item.to}`;
       return '-';
     };
-
-    // 恢复：支付记录保留每一次提交的完整信息
     const formatPaymentRecords = () => {
       if(!order.paymentRecords?.length) return '-';
-      // 按提交顺序编号，保留每一笔的完整信息
       return order.paymentRecords.map((r, i) => {
         return `第${i+1}笔：${r.payType || '未知方式'} ${r.amount || 0}元 ${r.time || '未知时间'}`;
       }).join('\n');
     };
-
     const renderScreenshots = () => {
       const arr = order.payScreenshots || [];
       if(!arr.length) return '<span style="color:#999">无截图</span>';
-      // 优化：Base64图片预览防XSS
       return `<div class="pay-img-list">${arr.map(u=>
         `<img src="${u}" class="pay-img-item" onclick="openImage('${u.replace(/'/g, "\\'")}')" alt="支付截图">`
       ).join('')}</div>`;
     };
-
     tr.innerHTML = `
      <td>${order.orderId || '-'}</td>
      <td>${order.userName || '-'}</td>
@@ -520,14 +464,12 @@ function renderTable() {
   });
 }
 
-// 优化：刷新金额增加加载提示，错误处理更友好
 async function refreshAmount(orderId) {
   if(!confirm('确定刷新该订单的金额吗？')) return;
   showLoading("刷新金额中...");
   try {
     const r = await fetch(`${SERVER_URL}/api/recalculateAmount`,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
+      method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({ pwd:ADMIN_PWD, orderId })
     });
     const d = await r.json();
@@ -540,14 +482,12 @@ async function refreshAmount(orderId) {
   }
 }
 
-// 优化：删除订单增加加载提示，二次确认更清晰
 async function deleteOrder(id) {
   if(!confirm('确定删除该订单吗？删除后无法恢复！')) return;
   showLoading("删除订单中...");
   try {
     const r = await fetch(`${SERVER_URL}/api/deleteOrder`,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
+      method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({ pwd:ADMIN_PWD, id })
     });
     const d = await r.json();
@@ -560,7 +500,6 @@ async function deleteOrder(id) {
   }
 }
 
-// 优化：搜索功能增加模糊匹配，支持手机号部分匹配（适配合并后的订单）
 function searchOrders() {
   const name = document.getElementById('searchName').value.trim().toLowerCase();
   const phone = document.getElementById('searchPhone').value.trim();
@@ -579,32 +518,19 @@ function resetSearch() {
   renderTable();
 }
 
-// 修复：导出Excel 去除付款截图链接列 + 保留合并后的支付记录
 function exportExcel() {
   if(!filteredOrderData.length) { 
     showModal('提示','暂无数据可导出'); 
     return; 
   }
   showLoading("生成Excel中...");
-
   try {
     const excelData = filteredOrderData.map(o => {
-      // 空值保护
       o = {
-        orderId: '',
-        userName: '',
-        userPhone: '',
-        payType: '',
-        paymentRecords: [],
-        payScreenshots: [],
-        total: 0,
-        createTime: '',
-        carList: [],
-        isMultiSubmit: false,
-        isManuallyModified: false,
-        ...o
+        orderId: '',userName: '',userPhone: '',payType: '',paymentRecords: [],
+        payScreenshots: [],total: 0,createTime: '',carList: [],
+        isMultiSubmit: false,isManuallyModified: false,...o
       };
-
       const getInfo = (n) => {
         const i = o.carList.find(x => x.name === n);
         if(!i) return '-';
@@ -612,19 +538,21 @@ function exportExcel() {
         if(i.from && i.to) return i.from+'→'+i.to;
         return '-';
       };
-
-      // 保留所有支付记录（合并后的完整提交信息）
       const payRecords = o.paymentRecords?.length
         ? o.paymentRecords.map((r,i)=>`第${i+1}笔：${r.payType || '未知方式'} ${r.amount || 0}元 ${r.time || '未知时间'}`).join('\n')
         : '-';
-
+      let orderStatus = "首次提交";
+      if (o.isManuallyModified) {
+        orderStatus = "手动修改";
+      } else if (o.isMultiSubmit) {
+        orderStatus = "多次提交";
+      }
       return {
         '订单ID': o.orderId || '-',
         '姓名': o.userName || '-',
         '电话': o.userPhone || '-',
         '支付方式': o.payType || '-',
         '支付记录': payRecords,
-        // 已删除：付款截图链接列
         '总金额': `${o.total || 0}元`,
         '提交时间': o.createTime || '-',
         '4月11日早送': getInfo('4月11日早送'),
@@ -633,58 +561,29 @@ function exportExcel() {
         '4月12日晚接': getInfo('4月12日晚接'),
         '4月11日中午': getInfo('4月11日中午考点更换'),
         '4月12日中午': getInfo('4月12日中午考点更换'),
-        // 新增：导出时标记订单状态（便于核对）
-        '订单状态': o.isManuallyModified ? '手动修改' : (o.isMultiSubmit ? '多次提交' : '首次提交')
+        '订单状态': orderStatus
       };
     });
-
-    // 生成工作表
     const ws = XLSX.utils.json_to_sheet(excelData);
-
-    // 关键：给所有单元格设置自动换行样式
     const range = XLSX.utils.decode_range(ws['!ref'] || 'A1:A1');
     const wrapStyle = {
-      alignment: {
-        wrapText: true,  // 开启自动换行
-        vertical: 'top',  // 顶部对齐
-        horizontal: 'left' // 左对齐更易读
-      }
+      alignment: { wrapText: true, vertical: 'top', horizontal: 'left' }
     };
     for (let row = range.s.r; row <= range.e.r; row++) {
       for (let col = range.s.c; col <= range.e.c; col++) {
         const cellAddr = XLSX.utils.encode_cell({ r: row, c: col });
-        if (ws[cellAddr]) {
-          ws[cellAddr].s = wrapStyle;
-        }
+        if (ws[cellAddr]) ws[cellAddr].s = wrapStyle;
       }
     }
-
-    // 调整列宽（移除付款截图链接列的宽度配置）
     ws['!cols'] = [
-      {wch: 15}, // 订单ID
-      {wch: 10}, // 姓名
-      {wch: 15}, // 电话
-      {wch: 12}, // 支付方式
-      {wch: 30}, // 支付记录
-      {wch: 10}, // 总金额
-      {wch: 20}, // 提交时间
-      {wch: 18}, // 4月11日早送
-      {wch: 18}, // 4月11日晚接
-      {wch: 18}, // 4月12日早送
-      {wch: 18}, // 4月12日晚接
-      {wch: 18}, // 4月11日中午
-      {wch: 18}, // 4月12日中午
-      {wch: 12}  // 订单状态
+      {wch:15},{wch:10},{wch:15},{wch:12},{wch:30},{wch:10},{wch:20},
+      {wch:18},{wch:18},{wch:18},{wch:18},{wch:18},{wch:18},{wch:12}
     ];
-
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, '订单数据');
-    
-    // 优化：文件名增加时间戳，避免重复
     const dateStr = new Date().toLocaleDateString().replace(/\//g, '-');
     const timeStr = new Date().toTimeString().split(' ')[0].replace(/:/g, '-');
     XLSX.writeFile(wb, `山青院订单_${dateStr}_${timeStr}.xlsx`);
-    
     hideLoading();
     showModal('成功','Excel导出完成！');
   } catch (e) {
@@ -693,7 +592,6 @@ function exportExcel() {
   }
 }
 
-// 优化：弹窗显示函数增强
 function showModal(t,m){
   document.getElementById('modalTitle').innerText = t;
   document.getElementById('modalMsg').innerText = m;
@@ -704,14 +602,6 @@ function closeModal(){
   document.getElementById('resultModal').style.display = 'none';
 }
 
-// 新增：页面刷新前提示
-window.addEventListener('beforeunload', (e) => {
-  if (ADMIN_PWD) {
-    e.preventDefault();
-    e.returnValue = '您确定要离开吗？未保存的操作可能丢失';
-    return '您确定要离开吗？未保存的操作可能丢失';
-  }
-});
 </script>
 </body>
 </html>
