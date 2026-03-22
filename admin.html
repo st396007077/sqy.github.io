@@ -304,10 +304,10 @@ async function load() {
     hideLoading();
     if(data.code !==0) { showModal('无权限','请重新登录'); logout(); return; }
     
-    // ✅ 修复：保存原始订单数据
+    // 保存原始订单数据
     originalOrderData = data.data;
     
-    // ✅ 修复：使用新的合并逻辑
+    // ✅ 修复：使用独立的状态判断逻辑
     const userOrdersMap = new Map();
     
     // 按用户分组
@@ -387,19 +387,37 @@ function closeImgModal() { document.getElementById('imgModal').style.display = '
 function renderTable() {
   const list = document.getElementById('list');
   list.innerHTML = '';
-  if(!filteredOrderData.length) { list.innerHTML = '<tr><td colspan="15">暂无数据</td></tr>'; return; }
+  if(!filteredOrderData.length) { 
+    list.innerHTML = '<tr><td colspan="15">暂无数据</td></tr>'; 
+    return; 
+  }
+  
+  // 创建一个映射，用于存储每个订单的正确状态
+  const orderStatusMap = new Map();
+  
+  // 先处理原始订单数据，建立状态映射
+  originalOrderData.forEach(order => {
+    if (order._id) {
+      orderStatusMap.set(order._id, {
+        isManuallyModified: order.isManuallyModified || false,
+        isMultiSubmit: order.isMultiSubmit || false
+      });
+    }
+  });
   
   filteredOrderData.forEach(order => {
-    order = {
-      orderId: '',userName: '',userPhone: '',payType: '',paymentRecords: [],payScreenshots: [],
-      total: 0,createTime: '',carList: [],isManuallyModified: false,isMultiSubmit: false,_id: '',...order
+    // 确保从映射中获取正确的状态
+    const status = orderStatusMap.get(order._id) || {
+      isManuallyModified: order.isManuallyModified || false,
+      isMultiSubmit: order.isMultiSubmit || false
     };
     
-    // 确保每个订单独立判断状态
     const tr = document.createElement('tr');
-    if (order.isManuallyModified) {
+    
+    // ✅ 修复：使用正确的状态判断逻辑
+    if (status.isManuallyModified) {
       tr.className = 'row-modify';
-    } else if (order.isMultiSubmit) {
+    } else if (status.isMultiSubmit) {
       tr.className = 'row-multi-submit';
     } else {
       tr.className = 'row-first-submit';
@@ -527,7 +545,7 @@ async function refreshAmount(orderId) {
   if(!confirm('确定刷新金额？')) return;
   showLoading("刷新中...");
   try {
-    const r = await fetch(`${SERVER_URL}/api/recalculateAmount`,{
+    const r = await fetch(`${SERVERVER_URL}/api/recalculateAmount`,{
       method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ pwd:ADMIN_PWD, orderId })
     });
     const d = await r.json();
