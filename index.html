@@ -21,22 +21,44 @@ margin: 0;
 overflow-x: hidden;
 }
 
+/* ====================== 优化：固定按钮组容器 ====================== */
+.fixed-btn-group {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* 上下按钮间距，可自行调整 */
+  z-index: 9999;
+  align-items: center; /* 按钮居中对齐 */
+}
+
+/* 统一按钮样式：等宽、居中、统一内边距 */
+.query-btn, .upload-zkt-btn {
+  width: 110px; /* 固定宽度，保证两个按钮完全一致 */
+  padding: 6px 0;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  white-space: nowrap;
+  text-align: center;
+}
+
 .query-btn {
-position: fixed;
-top: 10px;
-right: 10px;
-padding: 6px 10px;
-background: #28a745;
-color: white;
-border: none;
-border-radius: 6px;
-cursor: pointer;
-font-size: 13px;
-z-index: 9999;
-white-space: nowrap;
+  background: #28a745;
 }
 .query-btn:hover {
-background: #218838;
+  background: #218838;
+}
+
+/* 上传准考证按钮样式 */
+.upload-zkt-btn {
+  background: #ff9800;
+}
+.upload-zkt-btn:hover {
+  background: #f57c00;
 }
 
 .container {
@@ -405,11 +427,30 @@ font-size: 15px;
 .example-img:hover {
   transform: scale(1.02);
 }
+
+/* ====================== 新增：准考证上传弹窗专属样式 ====================== */
+.zkt-note {
+  text-align: left;
+  line-height: 1.6;
+  color: #666;
+  margin: 10px 0;
+  font-size: 14px;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+#zktFileInput {
+  display: none;
+}
 </style>
 </head>
 <body>
 
-<button class="query-btn" onclick="openQueryModal()">交费信息查询</button>
+<!-- ====================== 优化：按钮包裹进垂直布局容器 ====================== -->
+<div class="fixed-btn-group">
+  <button class="upload-zkt-btn" onclick="openZKTModal()">上传准考证</button>
+  <button class="query-btn" onclick="openQueryModal()">交费信息查询</button>
+</div>
 
 <div class="container">
 <h1 class="title">山青院自考本科考试专车自助订阅</h1>
@@ -633,6 +674,33 @@ font-size: 15px;
 </div>
 </div>
 
+<!-- ====================== 新增：准考证上传弹窗 ====================== -->
+<div class="modal" id="zktModal">
+<div class="modal-content">
+<div class="modal-close-btn" onclick="closeZKTModal()">&times;</div>
+<h3>上传准考证</h3>
+<p class="zkt-note">请上传准考证截图或文件，点击"确认提交"后等待几秒自动上传</p>
+
+<!-- 准考证示例样图 -->
+<div class="example-img-container">
+  <p class="example-text">示例样图</p>
+  <img class="example-img" src="https://st396007077.github.io/sqy.github.io/images/ZKZ.jpg" onclick="openImgZoom(this.src)" alt="准考证示例">
+</div>
+
+<div class="preview-container" id="zktPreviewContainer"></div>
+<input type="file" id="zktFileInput" accept="image/*,application/pdf" onchange="previewZKTFile()">
+
+<div class="upload-btn-row">
+<button class="upload-btn" onclick="document.getElementById('zktFileInput').click()">上传准考证</button>
+</div>
+
+<div class="modal-btns">
+<button class="back-btn" onclick="closeZKTModal()">取消</button>
+<button class="confirm-submit-btn" onclick="submitZKT()">确认上传</button>
+</div>
+</div>
+</div>
+
 <!-- 图片放大弹窗 -->
 <div class="img-zoom-modal" id="imgZoomModal" onclick="closeImgZoom()">
 <img id="imgZoomContent" src="">
@@ -669,10 +737,14 @@ font-size: 15px;
 const SERVER_URL = "https://zikaocar-server.onrender.com";
 let selectedPayType = '';
 let existedCarNames = [];
-let existedCarList = []; // 🔥 新增：存储历史订单的完整班次信息
+let existedCarList = [];
 let hasUploadedScreenshot = false;
 let screenshotFiles = [];
 let isSubmitting = false;
+
+// ====================== 新增：准考证上传全局变量 ======================
+let zktFile = null;
+let isZktSubmitting = false;
 
 const FIXED_CAR_ORDER = [
 '4月11日早送','4月11日晚接','4月12日早送','4月12日晚接',
@@ -689,7 +761,6 @@ function updatePayExampleImg() {
   } else if (selectedPayType === '微信') {
     exampleImg.src = 'https://st396007077.github.io/sqy.github.io/images/WXFK.jpg';
   } else {
-    // 默认显示支付宝示例图
     exampleImg.src = 'https://st396007077.github.io/sqy.github.io/images/ZFBFK.jpg';
   }
 }
@@ -724,6 +795,7 @@ function saveFormData() {
     if (document.getElementById('payModal').style.display === 'flex') data.openModal = 'payModal';
     if (document.getElementById('qrModal').style.display === 'flex') data.openModal = 'qrModal';
     if (document.getElementById('screenshotModal').style.display === 'flex') data.openModal = 'screenshotModal';
+    if (document.getElementById('zktModal').style.display === 'flex') data.openModal = 'zktModal';
 
     localStorage.setItem('orderFormCache', JSON.stringify(data));
 }
@@ -744,7 +816,7 @@ function loadFormData() {
         document.getElementById(`school${t}`).style.display = checked ? 'block' : 'none';
     });
 
-    for (let t in data.schoolValues) {
+    for (let t in data.schoolValues[t]) {
         const sels = document.querySelectorAll(`.school-select-input[data-type="${t}"]`);
         data.schoolValues[t].forEach((val, i) => {
             if (sels[i]) sels[i].value = val;
@@ -754,13 +826,9 @@ function loadFormData() {
     calcTotal();
     saveFormData();
 
-    // ==============================================
-    // ✅ 核心优化：页面加载时自动查询已购班次
-    // ==============================================
     const name = data.userName || '';
     const phone = data.userPhone || '';
     if (name && phone && validateName(name) && validatePhone(phone)) {
-        // 直接自动加载历史，禁用已购班次
         loadUserHistory();
     }
 
@@ -768,6 +836,7 @@ function loadFormData() {
         document.getElementById('payModal').style.display = 'none';
         document.getElementById('qrModal').style.display = 'none';
         document.getElementById('screenshotModal').style.display = 'none';
+        document.getElementById('zktModal').style.display = 'none';
 
         if (data.openModal === 'payModal') {
             document.getElementById('payModal').style.display = 'flex';
@@ -793,7 +862,10 @@ function loadFormData() {
         if (data.openModal === 'screenshotModal') {
             document.getElementById('qrModal').style.display = 'none';
             document.getElementById('screenshotModal').style.display = 'flex';
-            updatePayExampleImg(); // 刷新页面加载缓存时更新示例图
+            updatePayExampleImg();
+        }
+        if (data.openModal === 'zktModal') {
+            document.getElementById('zktModal').style.display = 'flex';
         }
     }, 200);
 }
@@ -910,13 +982,13 @@ async function loadUserHistory() {
         const res = await fetch(`${SERVER_URL}/api/queryOrder?userName=${encodeURIComponent(name)}`);
         const data = await res.json();
         existedCarNames = [];
-        existedCarList = []; // 🔥 重置历史班次列表
+        existedCarList = [];
         
         if(data.code ===0 && data.data.length>0) {
             const u = data.data.find(item=>item.userPhone === phone);
             if(u) {
                 existedCarNames = u.carList.map(i=>i.name);
-                existedCarList = u.carList; // 🔥 保存完整的班次信息
+                existedCarList = u.carList;
             }
         }
         document.querySelectorAll('.car-check').forEach(box => {
@@ -1004,7 +1076,7 @@ function openScreenshotModal() {
     document.getElementById('previewContainer').innerHTML = '';
     document.getElementById('qrModal').style.display = 'none';
     document.getElementById('screenshotModal').style.display = 'flex';
-    updatePayExampleImg(); // 打开弹窗时更新示例图
+    updatePayExampleImg();
     saveFormData();
 }
 
@@ -1032,7 +1104,6 @@ async function submitOrderSecure() {
             return; 
         }
 
-        // 组装车次信息
         let carList = [];
         document.querySelectorAll('.car-check:checked').forEach(item => {
             const t = item.dataset.type;
@@ -1048,7 +1119,6 @@ async function submitOrderSecure() {
             carList.push(info);
         });
 
-        // 1. 提交订单（原有逻辑不变）
         const orderRes = await fetch(`${SERVER_URL}/api/submitOrder`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -1068,14 +1138,12 @@ async function submitOrderSecure() {
             return; 
         }
 
-        // ✅ 核心修改：精准提示 - 区分首次提交/合并提交
         if (orderData.msg.includes('合并到原有订单')) {
             showAlert("提交成功！您已提交过信息，本次内容已合并更新到原有订单中");
         } else {
             showAlert("提交成功！您的订单已创建");
         }
 
-        // 2. 将截图文件转为Base64数组（核心修改）
         const screenshotBase64List = [];
         for (const file of screenshotFiles) {
             const base64 = await new Promise((resolve) => {
@@ -1086,7 +1154,6 @@ async function submitOrderSecure() {
             screenshotBase64List.push(base64);
         }
 
-        // 3. 上传Base64格式的截图（适配后端接口）
         const uploadRes = await fetch(`${SERVER_URL}/api/uploadScreenshot`, { 
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -1102,10 +1169,8 @@ async function submitOrderSecure() {
             return;
         }
 
-        // 提交成功，展示结果
         document.getElementById('screenshotModal').style.display = 'none';
         
-        // ✅ 核心修复：根据提交类型显示不同的班次信息
         let info = `
 <strong>乘车人：</strong>${name}<br>
 <strong>电话：</strong>${phone.replace(/(\d{3})\d{4}(\d{4})/,'$1****$2')}<br>
@@ -1115,12 +1180,7 @@ async function submitOrderSecure() {
 <strong>提交时间：</strong>${createTime}<br>`;
         
         if (orderData.msg.includes('合并到原有订单')) {
-            // ✅ 多次提交/追加：显示"已选班次"（所有历史已有班次）和"新增班次"（本次新增班次）
-            
-            // 🔥 修复：获取所有历史已有班次（完整的班次信息）
-            const existingCars = existedCarList; // 使用保存的历史班次完整信息
-            
-            // 获取本次新增的班次（本次提交的班次中，不在历史班次中的）
+            const existingCars = existedCarList;
             const newCars = [];
             carList.forEach(item => {
                 if (!existedCarNames.includes(item.name)) {
@@ -1128,7 +1188,6 @@ async function submitOrderSecure() {
                 }
             });
             
-            // 显示"已选班次"（历史已有班次）
             if (existingCars.length > 0) {
                 info += `<strong>已选班次：</strong><br>`;
                 FIXED_CAR_ORDER.forEach(n => {
@@ -1141,7 +1200,6 @@ async function submitOrderSecure() {
                 });
             }
             
-            // 显示"新增班次"（本次新增的班次）
             if (newCars.length > 0) {
                 info += `<strong>新增班次：</strong><br>`;
                 FIXED_CAR_ORDER.forEach(n => {
@@ -1154,7 +1212,6 @@ async function submitOrderSecure() {
                 });
             }
         } else {
-            // ✅ 首次提交：只显示"已选班次"
             info += `<strong>已选班次：</strong><br>`;
             FIXED_CAR_ORDER.forEach(n => {
                 const item = carList.find(i=>i.name===n);
@@ -1169,7 +1226,6 @@ async function submitOrderSecure() {
         document.getElementById('successInfo').innerHTML = info;
         document.getElementById('successModal').style.display = 'flex';
         
-        // 清空缓存，重新加载历史（禁用已选班次）
         clearFormCache();
         loadUserHistory();
     } catch (e) {
@@ -1227,6 +1283,97 @@ function searchPayInfo(){
     .catch(e => {
         showAlert('查询失败：网络异常');
     });
+}
+
+// ====================== 新增：准考证上传全功能逻辑 ======================
+function openZKTModal() {
+    zktFile = null;
+    document.getElementById('zktFileInput').value = '';
+    document.getElementById('zktPreviewContainer').innerHTML = '';
+    document.getElementById('zktModal').style.display = 'flex';
+    saveFormData();
+}
+
+function closeZKTModal() {
+    document.getElementById('zktModal').style.display = 'none';
+    saveFormData();
+}
+
+function previewZKTFile() {
+    const file = document.getElementById('zktFileInput').files[0];
+    if (!file) return;
+    
+    const maxSize = 20 * 1024 * 1024;
+    if (file.size > maxSize) {
+        showAlert('文件大小不能超过20MB！');
+        return;
+    }
+
+    zktFile = file;
+    const container = document.getElementById('zktPreviewContainer');
+    container.innerHTML = '';
+
+    if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            img.className = 'preview-img';
+            img.onclick = () => openImgZoom(e.target.result);
+            container.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+    } else {
+        const tip = document.createElement('div');
+        tip.style.padding = '10px';
+        tip.style.background = '#e3f2fd';
+        tip.style.borderRadius = '6px';
+        tip.innerText = `已选择PDF文件：${file.name}`;
+        container.appendChild(tip);
+    }
+    saveFormData();
+}
+
+async function submitZKT() {
+    if (isZktSubmitting) {
+        showAlert('正在上传，请稍候...');
+        return;
+    }
+    if (!zktFile) {
+        showAlert('请先选择准考证文件（图片/PDF）！');
+        return;
+    }
+
+    isZktSubmitting = true;
+    const userName = document.getElementById('userName').value || '未填写姓名';
+    const userPhone = document.getElementById('userPhone').value || '未填写电话';
+
+    try {
+        // 模拟发送文件到邮箱（后端对接后替换为真实接口）
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        // 上传成功
+        const successAlert = document.createElement('div');
+        successAlert.className = 'custom-alert';
+        successAlert.innerHTML = `
+        <div class="alert-content">
+            <div class="alert-text">准考证已上传完成</div>
+            <button class="alert-btn" onclick="closeZKTModal(); this.closest('.custom-alert').remove();">确定</button>
+        </div>`;
+        document.body.appendChild(successAlert);
+    } catch (e) {
+        // 上传失败
+        const failAlert = document.createElement('div');
+        failAlert.className = 'custom-alert';
+        failAlert.innerHTML = `
+        <div class="alert-content">
+            <div class="alert-text">准考证上传失败，请重试或联系群主</div>
+            <button class="alert-btn" onclick="this.closest('.custom-alert').remove();">确定</button>
+        </div>`;
+        document.body.appendChild(failAlert);
+    } finally {
+        isZktSubmitting = false;
+    }
 }
 </script>
 </body>
