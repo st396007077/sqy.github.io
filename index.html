@@ -380,6 +380,31 @@ border-radius: 6px;
 cursor: pointer;
 font-size: 15px;
 }
+
+/* ====================== 新增：支付示例图样式 ====================== */
+.example-img-container {
+  margin: 20px 0;
+  text-align: center;
+}
+.example-text {
+  font-size: 15px;
+  color: #333;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+.example-img {
+  max-width: 220px;
+  width: 100%;
+  height: auto;
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  cursor: zoom-in;
+  object-fit: contain;
+  transition: transform 0.2s;
+}
+.example-img:hover {
+  transform: scale(1.02);
+}
 </style>
 </head>
 <body>
@@ -581,11 +606,17 @@ font-size: 15px;
 </div>
 </div>
 
-<!-- 支付截图上传弹窗 -->
+<!-- 支付截图上传弹窗 ====================== 新增示例图区域 ====================== -->
 <div class="modal" id="screenshotModal">
 <div class="modal-content">
 <h3>提交支付截图</h3>
 <p style="margin:15px 0;">请上传支付成功的截图凭证，点击"确认提交"后等待几秒自动显示班次信息</p>
+
+<!-- 支付示例图（新增） -->
+<div class="example-img-container">
+  <p class="example-text">示例样图</p>
+  <img id="payExampleImg" class="example-img" onclick="openImgZoom(this.src)" alt="支付截图示例">
+</div>
 
 <div class="preview-container" id="previewContainer"></div>
 
@@ -648,6 +679,20 @@ const FIXED_CAR_ORDER = [
 '4月11日中午考点更换','4月12日中午考点更换'
 ];
 
+// ====================== 新增：根据支付方式更新示例图 ======================
+function updatePayExampleImg() {
+  const exampleImg = document.getElementById('payExampleImg');
+  if (!exampleImg) return;
+  
+  if (selectedPayType === '支付宝') {
+    exampleImg.src = 'https://st396007077.github.io/sqy.github.io/images/ZFBFK.jpg';
+  } else if (selectedPayType === '微信') {
+    exampleImg.src = 'https://st396007077.github.io/sqy.github.io/images/WXFK.jpg';
+  } else {
+    // 默认显示支付宝示例图
+    exampleImg.src = 'https://st396007077.github.io/sqy.github.io/images/ZFBFK.jpg';
+  }
+}
 
 // 选择学校后，只隐藏当前项的红色错误
 function checkSchoolError(select) {
@@ -748,6 +793,7 @@ function loadFormData() {
         if (data.openModal === 'screenshotModal') {
             document.getElementById('qrModal').style.display = 'none';
             document.getElementById('screenshotModal').style.display = 'flex';
+            updatePayExampleImg(); // 刷新页面加载缓存时更新示例图
         }
     }, 200);
 }
@@ -958,6 +1004,7 @@ function openScreenshotModal() {
     document.getElementById('previewContainer').innerHTML = '';
     document.getElementById('qrModal').style.display = 'none';
     document.getElementById('screenshotModal').style.display = 'flex';
+    updatePayExampleImg(); // 打开弹窗时更新示例图
     saveFormData();
 }
 
@@ -1158,7 +1205,7 @@ function searchPayInfo(){
         const list = d.data.filter(i=>i.userPhone === p);
         if(list.length ===0) { 
             document.getElementById('queryResult').innerHTML='<span style="color:red">未找到交费信息</span>'; 
-            return; 
+            return;
         }
         let html = '';
         list.forEach((item,idx)=>{
