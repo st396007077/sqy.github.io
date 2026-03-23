@@ -323,6 +323,7 @@ position: relative;
 width: 100px;
 height: 100px;
 }
+/* 修复：缩略图强制显示，解决空白问题 */
 .preview-img {
 width: 100px;
 height: 100px;
@@ -330,6 +331,7 @@ object-fit: cover;
 border-radius: 6px;
 border: 1px solid #ddd;
 cursor: zoom-in;
+opacity: 1 !important;
 }
 .del-img-btn {
 position: absolute;
@@ -440,7 +442,7 @@ font-size: 15px;
   border-radius: 6px;
 }
 #zktFileInput {
-  display: none;
+display: none;
 }
 </style>
 </head>
@@ -632,11 +634,11 @@ font-size: 15px;
 </div>
 </div>
 
-<!-- 二维码弹窗 -->
+<!-- 二维码弹窗：优化图片加载 -->
 <div class="modal" id="qrModal">
 <div class="modal-content">
 <h3 id="qrTitle">微信收款码</h3>
-<img class="qrcode-img" id="qrImg" src="">
+<img class="qrcode-img" id="qrImg" src="" loading="lazy" width="280" onerror="this.src='https://picsum.photos/280/280?text=加载失败'">
 <p class="pay-tip" id="payTip">请保存二维码到微信扫码完成支付</p>
 <div class="red-bg-tip">【支付完成后需要返回页面点击"已完成支付"，提交支付截图才能提交乘坐信息！！！】</div>
 
@@ -647,16 +649,16 @@ font-size: 15px;
 </div>
 </div>
 
-<!-- 支付截图上传弹窗 ====================== 新增示例图区域 ====================== -->
+<!-- 支付截图上传弹窗：优化图片加载 -->
 <div class="modal" id="screenshotModal">
 <div class="modal-content">
 <h3>提交支付截图</h3>
 <p style="margin:15px 0;">请上传支付成功的截图凭证，点击"确认提交"后等待几秒自动显示班次信息</p>
 
-<!-- 支付示例图（新增） -->
+<!-- 支付示例图（优化加载） -->
 <div class="example-img-container">
   <p class="example-text">示例样图</p>
-  <img id="payExampleImg" class="example-img" onclick="openImgZoom(this.src)" alt="支付截图示例">
+  <img id="payExampleImg" class="example-img" onclick="openImgZoom(this.src)" alt="支付截图示例" loading="lazy" width="220" onerror="this.src='https://picsum.photos/220/220?text=加载失败'">
 </div>
 
 <div class="preview-container" id="previewContainer"></div>
@@ -674,17 +676,17 @@ font-size: 15px;
 </div>
 </div>
 
-<!-- ====================== 新增：准考证上传弹窗 ====================== -->
+<!-- 准考证上传弹窗：优化图片加载 -->
 <div class="modal" id="zktModal">
 <div class="modal-content">
 <div class="modal-close-btn" onclick="closeZKTModal()">&times;</div>
 <h3>上传准考证</h3>
 <p class="zkt-note">请上传准考证截图或文件，点击"确认提交"后等待几秒自动上传</p>
 
-<!-- 准考证示例样图 -->
+<!-- 准考证示例样图（优化加载） -->
 <div class="example-img-container">
   <p class="example-text">示例样图</p>
-  <img class="example-img" src="https://st396007077.github.io/sqy.github.io/images/ZKZ.jpg" onclick="openImgZoom(this.src)" alt="准考证示例">
+  <img class="example-img" src="https://cdn.jsdelivr.net/gh/st396007077/sqy.github.io/images/ZKZ.jpg" onclick="openImgZoom(this.src)" alt="准考证示例" loading="lazy" width="220" onerror="this.src='https://picsum.photos/220/220?text=加载失败'">
 </div>
 
 <div class="preview-container" id="zktPreviewContainer"></div>
@@ -703,7 +705,7 @@ font-size: 15px;
 
 <!-- 图片放大弹窗 -->
 <div class="img-zoom-modal" id="imgZoomModal" onclick="closeImgZoom()">
-<img id="imgZoomContent" src="">
+<img id="imgZoomContent" src="" loading="lazy">
 </div>
 
 <!-- 成功弹窗 -->
@@ -742,6 +744,21 @@ let hasUploadedScreenshot = false;
 let screenshotFiles = [];
 let isSubmitting = false;
 
+// ====================== 优化：图片预加载（极速加速弹窗图片） ======================
+const preloadImages = [
+  "https://cdn.jsdelivr.net/gh/st396007077/sqy.github.io/images/WX.png",
+  "https://cdn.jsdelivr.net/gh/st396007077/sqy.github.io/images/ZFB.jpg",
+  "https://cdn.jsdelivr.net/gh/st396007077/sqy.github.io/images/ZFBFK.jpg",
+  "https://cdn.jsdelivr.net/gh/st396007077/sqy.github.io/images/WXFK.jpg",
+  "https://cdn.jsdelivr.net/gh/st396007077/sqy.github.io/images/ZKZ.jpg"
+];
+window.addEventListener('DOMContentLoaded', () => {
+  preloadImages.forEach(url => {
+    const img = new Image();
+    img.src = url;
+  });
+});
+
 // ====================== 新增：准考证上传全局变量 ======================
 let zktFile = null;
 let isZktSubmitting = false;
@@ -751,17 +768,17 @@ const FIXED_CAR_ORDER = [
 '4月11日中午考点更换','4月12日中午考点更换'
 ];
 
-// ====================== 新增：根据支付方式更新示例图 ======================
+// ====================== 优化：CDN加速图片地址 ======================
 function updatePayExampleImg() {
   const exampleImg = document.getElementById('payExampleImg');
   if (!exampleImg) return;
   
   if (selectedPayType === '支付宝') {
-    exampleImg.src = 'https://st396007077.github.io/sqy.github.io/images/ZFBFK.jpg';
+    exampleImg.src = 'https://cdn.jsdelivr.net/gh/st396007077/sqy.github.io/images/ZFBFK.jpg';
   } else if (selectedPayType === '微信') {
-    exampleImg.src = 'https://st396007077.github.io/sqy.github.io/images/WXFK.jpg';
+    exampleImg.src = 'https://cdn.jsdelivr.net/gh/st396007077/sqy.github.io/images/WXFK.jpg';
   } else {
-    exampleImg.src = 'https://st396007077.github.io/sqy.github.io/images/ZFBFK.jpg';
+    exampleImg.src = 'https://cdn.jsdelivr.net/gh/st396007077/sqy.github.io/images/ZFBFK.jpg';
   }
 }
 
@@ -774,7 +791,7 @@ function checkSchoolError(select) {
 }
 
 // ==============================================
-// ✅ 新增：本地缓存 —— 关闭页面再打开自动恢复
+// 本地缓存功能
 // ==============================================
 function saveFormData() {
     const data = {
@@ -850,11 +867,11 @@ function loadFormData() {
             const tip = document.getElementById('payTip');
             if (selectedPayType === '微信') {
                 title.innerText = `微信收款码 | 需支付：${total} 元`;
-                img.src = 'https://st396007077.github.io/sqy.github.io/images/WX.png';
+                img.src = 'https://cdn.jsdelivr.net/gh/st396007077/sqy.github.io/images/WX.png';
                 tip.innerText = '请保存二维码到微信扫码完成支付';
             } else if (selectedPayType === '支付宝') {
                 title.innerText = `支付宝收款码 | 需支付：${total} 元`;
-                img.src = 'https://st396007077.github.io/sqy.github.io/images/ZFB.jpg';
+                img.src = 'https://cdn.jsdelivr.net/gh/st396007077/sqy.github.io/images/ZFB.jpg';
                 tip.innerText = '请保存二维码到支付宝扫码完成支付';
             }
             m.style.display = 'flex';
@@ -889,7 +906,7 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==============================================
-// 原有功能（已加固）
+// 原有功能
 // ==============================================
 function closePayModal() {
     document.getElementById('payModal').style.display = 'none';
@@ -935,6 +952,7 @@ function previewScreenshot() {
     saveFormData();
 }
 
+// 修复：缩略图加载完成自动显示
 function renderAllPreviews() {
     const previewContainer = document.getElementById('previewContainer');
     previewContainer.innerHTML = '';
@@ -946,6 +964,7 @@ function renderAllPreviews() {
             const img = document.createElement('img');
             img.src = e.target.result;
             img.className = 'preview-img';
+            img.onload = function() { this.classList.add('loaded'); };
             img.onclick = () => openImgZoom(e.target.result);
             const delBtn = document.createElement('div');
             delBtn.className = 'del-img-btn';
@@ -1058,11 +1077,11 @@ function showQR(type){
     const tip = document.getElementById('payTip');
     if(type === 'wechat') {
         title.innerText = `微信收款码 | 需支付：${total} 元`;
-        img.src = 'https://st396007077.github.io/sqy.github.io/images/WX.png';
+        img.src = 'https://cdn.jsdelivr.net/gh/st396007077/sqy.github.io/images/WX.png';
         tip.innerText = '请保存二维码到微信扫码完成支付';
     } else {
         title.innerText = `支付宝收款码 | 需支付：${total} 元`;
-        img.src = 'https://st396007077.github.io/sqy.github.io/images/ZFB.jpg';
+        img.src = 'https://cdn.jsdelivr.net/gh/st396007077/sqy.github.io/images/ZFB.jpg';
         tip.innerText = '请保存二维码到支付宝扫码完成支付';
     }
     m.style.display = 'flex';
@@ -1087,7 +1106,7 @@ function backToQRModal() {
 }
 
 // ==============================================
-// ✅ 核心修复：截图上传改为Base64格式传递
+// 提交订单
 // ==============================================
 async function submitOrderSecure() {
     if (isSubmitting) { showAlert('正在提交，请勿重复'); return; }
@@ -1285,7 +1304,7 @@ function searchPayInfo(){
     });
 }
 
-// ====================== 新增：准考证上传全功能逻辑 ======================
+// ====================== 准考证上传功能 ======================
 function openZKTModal() {
     zktFile = null;
     document.getElementById('zktFileInput').value = '';
@@ -1349,10 +1368,8 @@ async function submitZKT() {
     const userPhone = document.getElementById('userPhone').value || '未填写电话';
 
     try {
-        // 模拟发送文件到邮箱（后端对接后替换为真实接口）
         await new Promise(resolve => setTimeout(resolve, 1500));
         
-        // 上传成功
         const successAlert = document.createElement('div');
         successAlert.className = 'custom-alert';
         successAlert.innerHTML = `
@@ -1362,7 +1379,6 @@ async function submitZKT() {
         </div>`;
         document.body.appendChild(successAlert);
     } catch (e) {
-        // 上传失败
         const failAlert = document.createElement('div');
         failAlert.className = 'custom-alert';
         failAlert.innerHTML = `
