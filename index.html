@@ -21,44 +21,11 @@ margin: 0;
 overflow-x: hidden;
 }
 
-/* ====================== 优化：固定按钮组容器 ====================== */
-.fixed-btn-group {
-  position: fixed;
-  top: 10px;
-  right: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px; /* 上下按钮间距，可自行调整 */
-  z-index: 9999;
-  align-items: center; /* 按钮居中对齐 */
-}
-
-/* 统一按钮样式：等宽、居中、统一内边距 */
-.query-btn, .upload-zkt-btn {
-  width: 110px; /* 固定宽度，保证两个按钮完全一致 */
-  padding: 6px 0;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 13px;
-  white-space: nowrap;
-  text-align: center;
-}
-
 .query-btn {
   background: #28a745;
 }
 .query-btn:hover {
   background: #218838;
-}
-
-/* 上传准考证按钮样式 */
-.upload-zkt-btn {
-  background: #ff9800;
-}
-.upload-zkt-btn:hover {
-  background: #f57c00;
 }
 
 .container {
@@ -430,29 +397,10 @@ font-size: 15px;
   transform: scale(1.02);
 }
 
-/* ====================== 新增：准考证上传弹窗专属样式 ====================== */
-.zkt-note {
-  text-align: left;
-  line-height: 1.6;
-  color: #666;
-  margin: 10px 0;
-  font-size: 14px;
-  padding: 10px;
-  background: #f8f9fa;
-  border-radius: 6px;
-}
-#zktFileInput {
-display: none;
-}
 </style>
 </head>
 <body>
 
-<!-- ====================== 优化：按钮包裹进垂直布局容器 ====================== -->
-<div class="fixed-btn-group">
-  <button class="upload-zkt-btn" onclick="openZKTModal()">上传准考证</button>
-  <button class="query-btn" onclick="openQueryModal()">交费信息查询</button>
-</div>
 
 <div class="container">
 <h1 class="title">山青院自考本科考试专车自助订阅</h1>
@@ -672,33 +620,6 @@ display: none;
 <div class="modal-btns">
 <button class="back-btn" onclick="backToQRModal()">返回</button>
 <button class="confirm-submit-btn" onclick="submitOrderSecure()">确认提交</button>
-</div>
-</div>
-</div>
-
-<!-- 准考证上传弹窗：优化图片加载 -->
-<div class="modal" id="zktModal">
-<div class="modal-content">
-<div class="modal-close-btn" onclick="closeZKTModal()">&times;</div>
-<h3>上传准考证</h3>
-<p class="zkt-note">请上传准考证截图或文件，点击"确认提交"后等待几秒自动上传</p>
-
-<!-- 准考证示例样图（优化加载） -->
-<div class="example-img-container">
-  <p class="example-text">示例样图</p>
-  <img class="example-img" src="https://cdn.jsdelivr.net/gh/st396007077/sqy.github.io/images/ZKZ.jpg" onclick="openImgZoom(this.src)" alt="准考证示例" loading="lazy" width="220" onerror="this.src='https://picsum.photos/220/220?text=加载失败'">
-</div>
-
-<div class="preview-container" id="zktPreviewContainer"></div>
-<input type="file" id="zktFileInput" accept="image/*,application/pdf" onchange="previewZKTFile()">
-
-<div class="upload-btn-row">
-<button class="upload-btn" onclick="document.getElementById('zktFileInput').click()">上传准考证</button>
-</div>
-
-<div class="modal-btns">
-<button class="back-btn" onclick="closeZKTModal()">取消</button>
-<button class="confirm-submit-btn" onclick="submitZKT()">确认上传</button>
 </div>
 </div>
 </div>
