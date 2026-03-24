@@ -21,7 +21,29 @@ margin: 0;
 overflow-x: hidden;
 }
 
+/* ====================== 固定按钮组容器 ====================== */
+.fixed-btn-group {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 9999;
+  align-items: center;
+}
+
+/* 统一按钮样式 */
 .query-btn {
+  width: 110px;
+  padding: 6px 0;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  white-space: nowrap;
+  text-align: center;
   background: #28a745;
 }
 .query-btn:hover {
@@ -290,7 +312,6 @@ position: relative;
 width: 100px;
 height: 100px;
 }
-/* 修复：缩略图强制显示，解决空白问题 */
 .preview-img {
 width: 100px;
 height: 100px;
@@ -372,7 +393,7 @@ cursor: pointer;
 font-size: 15px;
 }
 
-/* ====================== 新增：支付示例图样式 ====================== */
+/* 支付示例图样式 */
 .example-img-container {
   margin: 20px 0;
   text-align: center;
@@ -396,11 +417,14 @@ font-size: 15px;
 .example-img:hover {
   transform: scale(1.02);
 }
-
 </style>
 </head>
 <body>
 
+<!-- 按钮组：仅保留查询按钮 -->
+<div class="fixed-btn-group">
+  <button class="query-btn" onclick="openQueryModal()">交费信息查询</button>
+</div>
 
 <div class="container">
 <h1 class="title">山青院自考本科考试专车自助订阅</h1>
@@ -582,7 +606,7 @@ font-size: 15px;
 </div>
 </div>
 
-<!-- 二维码弹窗：优化图片加载 -->
+<!-- 二维码弹窗 -->
 <div class="modal" id="qrModal">
 <div class="modal-content">
 <h3 id="qrTitle">微信收款码</h3>
@@ -597,13 +621,12 @@ font-size: 15px;
 </div>
 </div>
 
-<!-- 支付截图上传弹窗：优化图片加载 -->
+<!-- 支付截图上传弹窗 -->
 <div class="modal" id="screenshotModal">
 <div class="modal-content">
 <h3>提交支付截图</h3>
 <p style="margin:15px 0;">请上传支付成功的截图凭证，点击"确认提交"后等待几秒自动显示班次信息</p>
 
-<!-- 支付示例图（优化加载） -->
 <div class="example-img-container">
   <p class="example-text">示例样图</p>
   <img id="payExampleImg" class="example-img" onclick="openImgZoom(this.src)" alt="支付截图示例" loading="lazy" width="220" onerror="this.src='https://picsum.photos/220/220?text=加载失败'">
@@ -665,13 +688,12 @@ let hasUploadedScreenshot = false;
 let screenshotFiles = [];
 let isSubmitting = false;
 
-// ====================== 优化：图片预加载（极速加速弹窗图片） ======================
+// 图片预加载
 const preloadImages = [
   "https://cdn.jsdelivr.net/gh/st396007077/sqy.github.io/images/WX.png",
   "https://cdn.jsdelivr.net/gh/st396007077/sqy.github.io/images/ZFB.jpg",
   "https://cdn.jsdelivr.net/gh/st396007077/sqy.github.io/images/ZFBFK.jpg",
-  "https://cdn.jsdelivr.net/gh/st396007077/sqy.github.io/images/WXFK.jpg",
-  "https://cdn.jsdelivr.net/gh/st396007077/sqy.github.io/images/ZKZ.jpg"
+  "https://cdn.jsdelivr.net/gh/st396007077/sqy.github.io/images/WXFK.jpg"
 ];
 window.addEventListener('DOMContentLoaded', () => {
   preloadImages.forEach(url => {
@@ -680,16 +702,12 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-// ====================== 新增：准考证上传全局变量 ======================
-let zktFile = null;
-let isZktSubmitting = false;
-
 const FIXED_CAR_ORDER = [
 '4月11日早送','4月11日晚接','4月12日早送','4月12日晚接',
 '4月11日中午考点更换','4月12日中午考点更换'
 ];
 
-// ====================== 优化：CDN加速图片地址 ======================
+// 优化支付示例图
 function updatePayExampleImg() {
   const exampleImg = document.getElementById('payExampleImg');
   if (!exampleImg) return;
@@ -703,7 +721,7 @@ function updatePayExampleImg() {
   }
 }
 
-// 选择学校后，只隐藏当前项的红色错误
+// 选择学校校验
 function checkSchoolError(select) {
     const tip = select.closest('.school-select').querySelector('.error-tip');
     if (select.value.trim() !== '') {
@@ -711,9 +729,7 @@ function checkSchoolError(select) {
     }
 }
 
-// ==============================================
 // 本地缓存功能
-// ==============================================
 function saveFormData() {
     const data = {
         userName: document.getElementById('userName').value.trim(),
@@ -733,7 +749,6 @@ function saveFormData() {
     if (document.getElementById('payModal').style.display === 'flex') data.openModal = 'payModal';
     if (document.getElementById('qrModal').style.display === 'flex') data.openModal = 'qrModal';
     if (document.getElementById('screenshotModal').style.display === 'flex') data.openModal = 'screenshotModal';
-    if (document.getElementById('zktModal').style.display === 'flex') data.openModal = 'zktModal';
 
     localStorage.setItem('orderFormCache', JSON.stringify(data));
 }
@@ -774,7 +789,6 @@ function loadFormData() {
         document.getElementById('payModal').style.display = 'none';
         document.getElementById('qrModal').style.display = 'none';
         document.getElementById('screenshotModal').style.display = 'none';
-        document.getElementById('zktModal').style.display = 'none';
 
         if (data.openModal === 'payModal') {
             document.getElementById('payModal').style.display = 'flex';
@@ -802,9 +816,6 @@ function loadFormData() {
             document.getElementById('screenshotModal').style.display = 'flex';
             updatePayExampleImg();
         }
-        if (data.openModal === 'zktModal') {
-            document.getElementById('zktModal').style.display = 'flex';
-        }
     }, 200);
 }
 
@@ -826,9 +837,7 @@ window.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// ==============================================
 // 原有功能
-// ==============================================
 function closePayModal() {
     document.getElementById('payModal').style.display = 'none';
     saveFormData();
@@ -873,7 +882,6 @@ function previewScreenshot() {
     saveFormData();
 }
 
-// 修复：缩略图加载完成自动显示
 function renderAllPreviews() {
     const previewContainer = document.getElementById('previewContainer');
     previewContainer.innerHTML = '';
@@ -1026,9 +1034,7 @@ function backToQRModal() {
     saveFormData();
 }
 
-// ==============================================
 // 提交订单
-// ==============================================
 async function submitOrderSecure() {
     if (isSubmitting) { showAlert('正在提交，请勿重复'); return; }
     if (!hasUploadedScreenshot) { showAlert('请上传截图'); return; }
@@ -1223,94 +1229,6 @@ function searchPayInfo(){
     .catch(e => {
         showAlert('查询失败：网络异常');
     });
-}
-
-// ====================== 准考证上传功能 ======================
-function openZKTModal() {
-    zktFile = null;
-    document.getElementById('zktFileInput').value = '';
-    document.getElementById('zktPreviewContainer').innerHTML = '';
-    document.getElementById('zktModal').style.display = 'flex';
-    saveFormData();
-}
-
-function closeZKTModal() {
-    document.getElementById('zktModal').style.display = 'none';
-    saveFormData();
-}
-
-function previewZKTFile() {
-    const file = document.getElementById('zktFileInput').files[0];
-    if (!file) return;
-    
-    const maxSize = 20 * 1024 * 1024;
-    if (file.size > maxSize) {
-        showAlert('文件大小不能超过20MB！');
-        return;
-    }
-
-    zktFile = file;
-    const container = document.getElementById('zktPreviewContainer');
-    container.innerHTML = '';
-
-    if (file.type.startsWith('image/')) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const img = document.createElement('img');
-            img.src = e.target.result;
-            img.className = 'preview-img';
-            img.onclick = () => openImgZoom(e.target.result);
-            container.appendChild(img);
-        };
-        reader.readAsDataURL(file);
-    } else {
-        const tip = document.createElement('div');
-        tip.style.padding = '10px';
-        tip.style.background = '#e3f2fd';
-        tip.style.borderRadius = '6px';
-        tip.innerText = `已选择PDF文件：${file.name}`;
-        container.appendChild(tip);
-    }
-    saveFormData();
-}
-
-async function submitZKT() {
-    if (isZktSubmitting) {
-        showAlert('正在上传，请稍候...');
-        return;
-    }
-    if (!zktFile) {
-        showAlert('请先选择准考证文件（图片/PDF）！');
-        return;
-    }
-
-    isZktSubmitting = true;
-    const userName = document.getElementById('userName').value || '未填写姓名';
-    const userPhone = document.getElementById('userPhone').value || '未填写电话';
-
-    try {
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        const successAlert = document.createElement('div');
-        successAlert.className = 'custom-alert';
-        successAlert.innerHTML = `
-        <div class="alert-content">
-            <div class="alert-text">准考证已上传完成</div>
-            <button class="alert-btn" onclick="closeZKTModal(); this.closest('.custom-alert').remove();">确定</button>
-        </div>`;
-        document.body.appendChild(successAlert);
-    } catch (e) {
-        const failAlert = document.createElement('div');
-        failAlert.className = 'custom-alert';
-        failAlert.innerHTML = `
-        <div class="alert-content">
-            <div class="alert-text">准考证上传失败，请重试或联系群主</div>
-            <button class="alert-btn" onclick="this.closest('.custom-alert').remove();">确定</button>
-        </div>`;
-        document.body.appendChild(failAlert);
-    } finally {
-        isZktSubmitting = false;
-    }
 }
 </script>
 </body>
