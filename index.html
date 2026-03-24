@@ -455,7 +455,7 @@ font-size: 15px;
 
 <div class="car-item">
 <div class="car-item-header">
-<input type="checkbox" class="car-check" value="20" data-type="1" data-name="4月11日早送" onchange="checkSchoolError(this); saveFormData()">
+<input type="checkbox" class="car-check" value="20" data-type="1" data-name="4月11日早送" onchange="onCarChange.call(this); checkSchoolError(this); saveFormData()">
 <span>4月11日早送（20元）</span>
 </div>
 <div class="school-select" id="school1">
