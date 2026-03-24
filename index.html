@@ -474,7 +474,7 @@ font-size: 15px;
 
 <div class="car-item">
 <div class="car-item-header">
-<input type="checkbox" class="car-check" value="20" data-type="2" data-name="4月11日晚接" onchange="checkSchoolError(this); saveFormData()">
+<input type="checkbox" class="car-check" value="20" data-type="2" data-name="4月11日晚接" onchange="onCarChange.call(this); checkSchoolError(this); saveFormData()">
 <span>4月11日晚接（20元）</span>
 </div>
 <div class="school-select" id="school2">
@@ -493,7 +493,7 @@ font-size: 15px;
 
 <div class="car-item">
 <div class="car-item-header">
-<input type="checkbox" class="car-check" value="20" data-type="3" data-name="4月12日早送" onchange="checkSchoolError(this); saveFormData()">
+<input type="checkbox" class="car-check" value="20" data-type="3" data-name="4月12日早送" onchange="onCarChange.call(this); checkSchoolError(this); saveFormData()">
 <span>4月12日早送（20元）</span>
 </div>
 <div class="school-select" id="school3">
@@ -512,7 +512,7 @@ font-size: 15px;
 
 <div class="car-item">
 <div class="car-item-header">
-<input type="checkbox" class="car-check" value="20" data-type="4" data-name="4月12日晚接" onchange="checkSchoolError(this); saveFormData()">
+<input type="checkbox" class="car-check" value="20" data-type="4" data-name="4月12日晚接" onchange="onCarChange.call(this); checkSchoolError(this); saveFormData()">
 <span>4月12日晚接（20元）</span>
 </div>
 <div class="school-select" id="school4">
@@ -531,7 +531,7 @@ font-size: 15px;
 
 <div class="car-item">
 <div class="car-item-header">
-<input type="checkbox" class="car-check" value="3" data-type="5" data-name="4月11日中午考点更换" onchange="checkSchoolError(this); saveFormData()">
+<input type="checkbox" class="car-check" value="3" data-type="5" data-name="4月11日中午考点更换" onchange="onCarChange.call(this); checkSchoolError(this); saveFormData()">
 <span>4月11日中午考点更换（3元）</span>
 </div>
 <div class="school-select" id="school5">
@@ -559,7 +559,7 @@ font-size: 15px;
 
 <div class="car-item">
 <div class="car-item-header">
-<input type="checkbox" class="car-check" value="3" data-type="6" data-name="4月12日中午考点更换" onchange="checkSchoolError(this); saveFormData()">
+<input type="checkbox" class="car-check" value="3" data-type="6" data-name="4月12日中午考点更换" onchange="onCarChange.call(this); checkSchoolError(this); saveFormData()">
 <span>4月12日中午考点更换（3元）</span>
 </div>
 <div class="school-select" id="school6">
@@ -606,7 +606,7 @@ font-size: 15px;
 </div>
 </div>
 
-<!-- 二维码弹窗 ✅ 优化：懒加载+固定尺寸+失败兜底 -->
+<!-- 二维码弹窗 -->
 <div class="modal" id="qrModal">
 <div class="modal-content">
 <h3 id="qrTitle">微信收款码</h3>
@@ -621,7 +621,7 @@ font-size: 15px;
 </div>
 </div>
 
-<!-- 支付截图上传弹窗 ✅ 优化：示例图懒加载+固定尺寸+失败兜底 -->
+<!-- 支付截图上传弹窗 -->
 <div class="modal" id="screenshotModal">
 <div class="modal-content">
 <h3>提交支付截图</h3>
@@ -647,7 +647,7 @@ font-size: 15px;
 </div>
 </div>
 
-<!-- 图片放大弹窗 ✅ 优化：懒加载 -->
+<!-- 图片放大弹窗 -->
 <div class="img-zoom-modal" id="imgZoomModal" onclick="closeImgZoom()">
 <img id="imgZoomContent" src="" loading="lazy">
 </div>
@@ -688,7 +688,7 @@ let hasUploadedScreenshot = false;
 let screenshotFiles = [];
 let isSubmitting = false;
 
-// ✅ 优化：图片预加载（CDN地址，弹窗图片秒开）
+// 图片预加载
 const preloadImages = [
   "https://cdn.jsdelivr.net/gh/st396007077/sqy.github.io/images/WX.png",
   "https://cdn.jsdelivr.net/gh/st396007077/sqy.github.io/images/ZFB.jpg",
@@ -707,7 +707,7 @@ const FIXED_CAR_ORDER = [
 '4月11日中午考点更换','4月12日中午考点更换'
 ];
 
-// ✅ 优化：支付示例图使用CDN加速地址
+// 优化支付示例图
 function updatePayExampleImg() {
   const exampleImg = document.getElementById('payExampleImg');
   if (!exampleImg) return;
@@ -802,12 +802,10 @@ function loadFormData() {
             const tip = document.getElementById('payTip');
             if (selectedPayType === '微信') {
                 title.innerText = `微信收款码 | 需支付：${total} 元`;
-                // ✅ CDN加速图片
                 img.src = 'https://cdn.jsdelivr.net/gh/st396007077/sqy.github.io/images/WX.png';
                 tip.innerText = '请保存二维码到微信扫码完成支付';
             } else if (selectedPayType === '支付宝') {
                 title.innerText = `支付宝收款码 | 需支付：${total} 元`;
-                // ✅ CDN加速图片
                 img.src = 'https://cdn.jsdelivr.net/gh/st396007077/sqy.github.io/images/ZFB.jpg';
                 tip.innerText = '请保存二维码到支付宝扫码完成支付';
             }
@@ -1008,12 +1006,10 @@ function showQR(type){
     const tip = document.getElementById('payTip');
     if(type === 'wechat') {
         title.innerText = `微信收款码 | 需支付：${total} 元`;
-        // ✅ CDN加速图片
         img.src = 'https://cdn.jsdelivr.net/gh/st396007077/sqy.github.io/images/WX.png';
         tip.innerText = '请保存二维码到微信扫码完成支付';
     } else {
         title.innerText = `支付宝收款码 | 需支付：${total} 元`;
-        // ✅ CDN加速图片
         img.src = 'https://cdn.jsdelivr.net/gh/st396007077/sqy.github.io/images/ZFB.jpg';
         tip.innerText = '请保存二维码到支付宝扫码完成支付';
     }
